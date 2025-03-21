@@ -5,7 +5,7 @@ from PIL import Image
 from datetime import datetime
 from hachoir.metadata import extractMetadata
 from hachoir.parser import createParser
-from helper.utils import progress_for_pyrogram, humanbytes, convert, check_verification, get_token
+from helper.utils import progress_for_pyrogram, humanbytes, convert  # check_verification aur get_token hata diye
 from helper.database import DvisPappa
 from config import Config
 import os
@@ -14,7 +14,6 @@ import re
 
 # Dictionary to track ongoing renaming operations
 renaming_operations = {}
-VERIFY = {}
 
 # Episode extraction patterns
 pattern1 = re.compile(r'S(\d+)(?:E|EP)(\d+)')
@@ -108,24 +107,15 @@ def extract_episode_number(filename):
 
 # Example usage
 if __name__ == "__main__":
-    filename = "One Piece S01 - EP01 - 1080p [Dual Audio] @net_pro_max.mkv"
+    filename = "I Got a Cheat Skill in Another World and Became Unrivale.mp4.mp4"
     episode_number = extract_episode_number(filename)
     print(f"Extracted Episode Number: {episode_number}")
+    quality = extract_quality(filename)
+    print(f"Extracted Quality: {quality}")
 
 @Client.on_message(filters.private & (filters.document | filters.video | filters.audio))
 async def auto_rename_files(client, message):
-    if not await check_verification(client, message.from_user.id) and VERIFY == True:
-        btn = [[
-            InlineKeyboardButton("Verify", url=await get_token(client, message.from_user.id, f"https://telegram.me/{Config.BOT_USERNAME}?start="))
-        ],[
-            InlineKeyboardButton("How To Open Link & Verify", url=Config.VERIFY_TUTORIAL)
-        ]]
-        await message.reply_text(
-            text="<b>You are not verified !\n Kindly verify to continue !</b>",
-            protect_content=True,
-            reply_markup=InlineKeyboardMarkup(btn)
-        )
-        return
+    # Verification check block removed
 
     user_id = message.from_user.id
     format_template = await DvisPappa.get_format_template(user_id)
@@ -166,7 +156,6 @@ async def auto_rename_files(client, message):
         for placeholder in placeholders:
             format_template = format_template.replace(placeholder, str(episode_number), 1)
 
-    # Quality extract karke replace karo; agar quality "Unknown" bhi ho to use use hi karo.
     quality_placeholders = ["quality", "Quality", "QUALITY", "{quality}"]
     for quality_placeholder in quality_placeholders:
         if quality_placeholder in format_template:
@@ -190,13 +179,18 @@ async def auto_rename_files(client, message):
         del renaming_operations[file_id]
         return await download_msg.edit(str(e))
 
+    # Modified duration extraction block
     duration = 0
     try:
-        metadata = extractMetadata(createParser(file_path))
-        if metadata.has("duration"):
+        parser = createParser(file_path)
+        metadata = extractMetadata(parser)
+        if metadata is not None and metadata.has("duration"):
             duration = metadata.get('duration').seconds
+        else:
+            duration = 0
     except Exception as e:
         print(f"Duration extract karne me error: {e}")
+        duration = 0
 
     upload_msg = await download_msg.edit("Upload start ho raha hai...")
     ph_path = None
