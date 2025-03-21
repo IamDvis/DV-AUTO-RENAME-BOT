@@ -8,18 +8,18 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 async def progress_for_pyrogram(current, total, ud_type, message, start):
     now = time.time()
     diff = now - start
-    if round(diff % 5.00) == 0 or current == total:
+    if round(diff % 5.00) == 0 or current == total:        
         percentage = current * 100 / total
-        speed = current / diff if diff > 0 else 0
+        speed = current / diff
         elapsed_time = round(diff) * 1000
-        time_to_completion = round((total - current) / speed) * 1000 if speed else 0
+        time_to_completion = round((total - current) / speed) * 1000
         estimated_total_time = elapsed_time + time_to_completion
 
-        elapsed_time_formatted = TimeFormatter(milliseconds=elapsed_time)
-        estimated_total_time_formatted = TimeFormatter(milliseconds=estimated_total_time)
+        elapsed_time = TimeFormatter(milliseconds=elapsed_time)
+        estimated_total_time = TimeFormatter(milliseconds=estimated_total_time)
 
-        # Fixed progress list jo user ne diya hai
-        progress_list = [
+        # Naya progress bar array use kar rahe hain
+        progress_bars = [
             "[■□□□□□□□□□] 10%",
             "[■■□□□□□□□□] 20%",
             "[■■■□□□□□□□] 30%",
@@ -31,22 +31,22 @@ async def progress_for_pyrogram(current, total, ud_type, message, start):
             "[■■■■■■■■■□] 90%",
             "[■■■■■■■■■■] 100%"
         ]
-        
-        # Calculate index: percentage ko 10 se divide karke index nikalo, max index 9 hoga
-        index = min(int(percentage // 10), 9)
-        progress_str = progress_list[index]
-        
-        tmp = f"{progress_str}\n" \
-              f"{round(percentage, 2)}% complete\n" \
-              f"{humanbytes(current)} of {humanbytes(total)} at {humanbytes(speed)}/s\n" \
-              f"Time elapsed: {elapsed_time_formatted} | ETA: {estimated_total_time_formatted if estimated_total_time_formatted else '0 s'}"
-        
+        index = min(math.floor(percentage / 10), 9)
+        progress = progress_bars[index]
+
+        tmp = progress + Txt.PROGRESS_BAR.format( 
+            round(percentage, 2),
+            humanbytes(current),
+            humanbytes(total),
+            humanbytes(speed),            
+            estimated_total_time if estimated_total_time != '' else "0 s"
+        )
         try:
             await message.edit(
-                text=f"{ud_type}\n\n{tmp}",
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ Cancel ✖️", callback_data="close")]])
+                text=f"{ud_type}\n\n{tmp}",               
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ Cancel ✖️", callback_data="close")]])                                               
             )
-        except Exception as e:
+        except:
             pass
 
             
