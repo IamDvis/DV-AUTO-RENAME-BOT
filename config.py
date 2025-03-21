@@ -21,13 +21,6 @@ class Config(object):
     # wes response configuration     
     WEBHOOK = bool(os.environ.get("WEBHOOK", "True"))
 
-    # Token Verification
-    API = os.environ.get("API", "87b1cadedd5f3ae42ea98cce01cf85c5136241b8") # shortlink api
-    URL = os.environ.get("URL", "modijiurl.com") # shortlink domain without https://
-    VERIFY_TUTORIAL = os.environ.get("VERIFY_TUTORIAL", "https://t.me/+cXIPgHSuJnxiNjU1") # how to open link 
-    BOT_USERNAME = os.environ.get("BOT_USERNAME", "Auto_x_Rename_Robot") # bot username without @
-    VERIFY = os.environ.get("VERIFY", "True") # set True Or False and make sure spelling is correct and first letter capital.
-
 
 class Txt(object):
     # part of text configuration
