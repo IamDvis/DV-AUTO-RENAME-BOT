@@ -112,13 +112,8 @@ def extract_episode_number(filename: str) -> str:
 
 # -------------------- Caption Parsing Function --------------------
 def parse_caption_info(caption: str) -> dict:
-    # Caption text se required details extract karta hai:
-    # 1. Title (File name)
-    # 2. Season
-    # 3. Episode
-    # 4. Audio Track / Language
-    # 5. Quality
-    # 6. Promo (jo separator ke baad ho)
+    # Caption text se details extract karta hai:
+    # Title, Season, Episode, Audio Track, Quality, aur Promo (agar separator ho)
     info = {
         "title": "N/A",
         "season": "N/A",
@@ -128,7 +123,7 @@ def parse_caption_info(caption: str) -> dict:
         "promo": ""
     }
     
-    # Split caption into lines and remove empty lines
+    # Split caption into non-empty lines; pehli line ko title maan lenge.
     lines = caption.splitlines()
     non_empty_lines = [line.strip() for line in lines if line.strip() != ""]
     if non_empty_lines:
@@ -160,17 +155,16 @@ def parse_caption_info(caption: str) -> dict:
 # -------------------- Main Handler Function --------------------
 @Client.on_message(filters.private & (filters.document | filters.video | filters.audio))
 async def auto_rename_files(client: Client, message: Message):
-    # Auto renames incoming media files based on user's format template.
-    # File download, rename, metadata extraction, aur upload progress ke saath process hota hai.
-    # Caption mein sirf file name, season, episode, audio track, quality aur promo (if defined) include kiya jata hai.
     user_id = message.from_user.id
+    # Get auto rename format (caption template) from database
     caption_template = await DvisPappa.get_caption(message.chat.id)
     media_preference = await DvisPappa.get_media_preference(user_id)
-
+    
+    # Agar caption template set nahi hua, to default template use karo
     if not caption_template:
-        await message.reply_text("Please Set An Auto Rename Format First Using /autorename")
-        return
+        caption_template = "Title       : {title}\nSeason      : {season}\nEpisode     : {episode}\nAudio Track : {audio}\nQuality     : {quality}"
 
+    # Determine file details based on type
     if message.document:
         file_id = message.document.file_id
         file_name = message.document.file_name
@@ -196,23 +190,28 @@ async def auto_rename_files(client: Client, message: Message):
             return
     renaming_operations[file_id] = datetime.now()
 
+    # Extract episode and quality from file name
     episode_number = extract_episode_number(file_name)
-    logger.info(f"Extracted Episode Number from file name: {episode_number}")
+    logger.info(f"Extracted Episode Number: {episode_number}")
 
     quality_extracted = extract_quality(file_name)
-    logger.info(f"Extracted Quality from file name: {quality_extracted}")
+    logger.info(f"Extracted Quality: {quality_extracted}")
 
-    new_format = caption_template
-    if episode_number:
-        for placeholder in ["episode", "Episode", "EPISODE", "{episode}"]:
-            if placeholder in new_format:
-                new_format = new_format.replace(placeholder, str(episode_number), 1)
+    # For file renaming: agar user ne /autorename caption ya {caption} set kiya hai,
+    # to original file name (without extension) use karo, warna template se placeholders replace karo.
+    if caption_template.strip().lower() in ["caption", "{caption}"]:
+        new_format = os.path.splitext(file_name)[0]
+    else:
+        new_format = caption_template
+        if episode_number:
+            for placeholder in ["episode", "Episode", "EPISODE", "{episode}"]:
+                if placeholder in new_format:
+                    new_format = new_format.replace(placeholder, str(episode_number), 1)
+                    break
+        for quality_placeholder in ["quality", "Quality", "QUALITY", "{quality}"]:
+            if quality_placeholder in new_format:
+                new_format = new_format.replace(quality_placeholder, quality_extracted, 1)
                 break
-
-    for quality_placeholder in ["quality", "Quality", "QUALITY", "{quality}"]:
-        if quality_placeholder in new_format:
-            new_format = new_format.replace(quality_placeholder, quality_extracted, 1)
-            break
 
     _, file_extension = os.path.splitext(file_name)
     new_file_name = f"{new_format}{file_extension}"
@@ -240,17 +239,26 @@ async def auto_rename_files(client: Client, message: Message):
     except Exception as e:
         logger.warning(f"Error extracting duration: {e}")
 
-    caption_details = parse_caption_info(caption_template)
-    caption_details["title"] = new_file_name
-
-    final_caption = (
-        f"Title       : {caption_details['title']}\n"
-        f"Season      : {caption_details['season']}\n"
-        f"Episode     : {caption_details['episode']}\n"
-        f"Audio Track : {caption_details['audio']}\n"
-        f"Quality     : {caption_details['quality']}\n\n"
-        f"{caption_details['promo']}"
-    )
+    # Generate final caption for upload
+    if caption_template.strip().lower() in ["caption", "{caption}"]:
+        final_caption = (
+            f"Title       : {new_file_name}\n"
+            f"Season      : N/A\n"
+            f"Episode     : {episode_number if episode_number else 'N/A'}\n"
+            f"Audio Track : N/A\n"
+            f"Quality     : {quality_extracted}\n"
+        )
+    else:
+        caption_details = parse_caption_info(caption_template)
+        caption_details["title"] = new_file_name
+        final_caption = (
+            f"Title       : {caption_details['title']}\n"
+            f"Season      : {caption_details['season']}\n"
+            f"Episode     : {caption_details['episode']}\n"
+            f"Audio Track : {caption_details['audio']}\n"
+            f"Quality     : {caption_details['quality']}\n\n"
+            f"{caption_details['promo']}"
+        )
 
     upload_msg = await download_msg.edit_text("Trying To Upload...")
     c_thumb = await DvisPappa.get_thumbnail(message.chat.id)
