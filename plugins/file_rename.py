@@ -105,7 +105,6 @@ def extract_episode_number(filename):
         print("Matched Pattern 4")
         return match.group(2)
     
-    # Agar koi valid episode pattern nahi mila, to None return karo.
     return None
 
 # ----------------- Example usage (Testing extraction functions) -----------------
@@ -149,7 +148,6 @@ async def auto_rename_files(client, message):
     
     print(f"Original File Name: {file_name}")
     
-    # Agar file recent rename operation mein hai, to usse ignore karo.
     if file_id in renaming_operations:
         elapsed_time = (datetime.now() - renaming_operations[file_id]).seconds
         if elapsed_time < 10:
@@ -217,7 +215,7 @@ async def auto_rename_files(client, message):
     c_caption = await DvisPappa.get_caption(message.chat.id)
     c_thumb = await DvisPappa.get_thumbnail(message.chat.id)
     
-    # Default caption format as per desired format, ab quality bhi add kiya gaya hai:
+    # Default caption format, quality bhi add kiya gaya hai:
     caption = c_caption.format(
         filename=new_file_name,
         filesize=humanbytes(file_size),
@@ -225,17 +223,21 @@ async def auto_rename_files(client, message):
         quality=extracted_quality
     ) if c_caption else f"📕Name ➠ : {new_file_name}\n\n🔗 Size ➠ : {humanbytes(file_size)}\n\n⏰ Duration ➠ : {convert(duration)}\n\n🎥 Quality ➠ : {extracted_quality}"
     
-    # Thumbnail download process with improved resize for better quality
+    # Thumbnail download process
     if c_thumb:
         ph_path = await client.download_media(c_thumb)
         print(f"Thumbnail download ho gaya: {ph_path}")
     elif media_type == "video" and message.video.thumbs:
-        ph_path = await client.download_media(message.video.thumbs[0].file_id)
+        # Select best quality thumbnail from available ones
+        best_thumb = max(message.video.thumbs, key=lambda t: t.width if hasattr(t, 'width') and t.width else 0)
+        ph_path = await client.download_media(best_thumb.file_id)
         if ph_path:
             with Image.open(ph_path) as img:
-                img = img.convert("RGB")
-                img = img.resize((320, 320), Image.LANCZOS)
-                img.save(ph_path, "JPEG")
+                # Agar image already high resolution hai, to resizing na karein; warna resize karke LANCZOS filter use karein
+                if img.width > 320:
+                    new_size = (320, 320)
+                    img = img.convert("RGB").resize(new_size, Image.LANCZOS)
+                    img.save(ph_path, "JPEG")
     
     try:
         if media_type == "document":
