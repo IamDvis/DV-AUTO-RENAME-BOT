@@ -4,7 +4,7 @@ from helper.database import DvisPappa
 @Client.on_message(filters.private & filters.command('set_caption'))
 async def add_caption(client, message):
     if len(message.command) == 1:
-       return await message.reply_text("**Give The Caption\n\nExample :- `/set_caption 📕Name ➠ : {filename} \n\n🔗 Size ➠ : {filesize} \n\n⏰ Duration ➠ : {duration}\n🎥 Quality ➠ : {quality}`**")
+       return await message.reply_text("**Give The Caption\n\nExample :- `/set_caption **📕Name ➠** : {filename} \n\n🔗 **Size ➠** : {filesize} \n\n⏰ **Duration ➠** : {duration}\n\n🎥 **Quality ➠** : {quality}`**")
     caption = message.text.split(" ", 1)[1]
     await DvisPappa.set_caption(message.from_user.id, caption=caption)
     await message.reply_text("**Your Caption Successfully Added ✅**")
