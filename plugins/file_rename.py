@@ -62,7 +62,7 @@ async def auto_rename(client: Client, msg: Message):
     fmt = await DvisPappa.get_format_template(uid)
     mtype = (await DvisPappa.get_media_preference(uid)) or "document"
     if not fmt:
-        return await msg.reply_text("Pehle /autorename command se format set karo.")
+        return await msg.reply_text("⚠️ Pehle /autorename command se format set karo.")
     
     if msg.document:
         fid, fname, fsize = msg.document.file_id, msg.document.file_name, msg.document.file_size
@@ -71,9 +71,9 @@ async def auto_rename(client: Client, msg: Message):
     elif msg.audio:
         fid, fname, fsize = msg.audio.file_id, f"{msg.audio.file_name}.mp3", msg.audio.file_size
     else:
-        return await msg.reply_text("Unsupported File Type")
+        return await msg.reply_text("❌ Unsupported File Type")
     
-    # Force video format if file extension is video type
+    # Force video format if file extension indicates video
     ext = os.path.splitext(fname)[1].lower()
     video_exts = [".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"]
     if ext in video_exts:
@@ -96,7 +96,7 @@ async def auto_rename(client: Client, msg: Message):
     new_name = f"{fmt}{ext}"
     path = f"downloads/{new_name}"
     
-    dmsg = await msg.reply_text("Download starting...")
+    dmsg = await msg.reply_text("🚀 Download starting...")
     try:
         await client.download_media(message=msg, file_name=path, progress=progress_for_pyrogram, progress_args=("Download Started...", dmsg, time.time()))
     except Exception as e:
@@ -111,7 +111,7 @@ async def auto_rename(client: Client, msg: Message):
     except Exception as e:
         dur = 0
     
-    umsg = await dmsg.edit("Upload starting...")
+    umsg = await dmsg.edit("📤 Upload starting...")
     cap = await DvisPappa.get_caption(msg.chat.id)
     caption = (cap.format(filename=new_name, filesize=humanbytes(fsize), duration=convert(dur), quality=q)
                if cap else f"📕Name ➠ : {new_name}\n\n🔗 Size ➠ : {humanbytes(fsize)}\n\n⏰ Duration ➠ : {convert(dur)}\n\n🎥 Quality ➠ : {q}")
@@ -129,7 +129,7 @@ async def auto_rename(client: Client, msg: Message):
         os.remove(path)
         if thumb: os.remove(thumb)
         del RENAMES[fid]
-        return await umsg.edit(f"Error: {e}")
+        return await umsg.edit(f"❌ Error: {e}")
     
     await dmsg.delete()
     os.remove(path)
