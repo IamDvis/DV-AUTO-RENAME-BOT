@@ -11,18 +11,22 @@ import os, time, re
 
 RENAMES = {}
 
-# Episode aur quality extraction (concise version)
-def extract_episode(fname):
-    pats = [r'S(\d+)(?:E|EP)(\d+)', r'S(\d+)\s*(?:E|EP|-\s*EP)(\d+)', 
-            r'(?:[([{<]\s*(?:E|EP)\s*(\d+)\s*[)\]}>])', r'(?:\s*-\s*(\d+)\s*)', 
-            r'S(\d+)[^\d]*(\d+)']
-    for i, p in enumerate(pats):
-        m = re.search(p, fname, re.IGNORECASE)
+# --- Extraction Functions ---
+def extract_episode(fname: str) -> str:
+    pats = [
+        r'S(\d+)(?:E|EP)(\d+)',
+        r'S(\d+)\s*(?:E|EP|-\s*EP)(\d+)',
+        r'(?:[([{<]\s*(?:E|EP)\s*(\d+)\s*[)\]}>])',
+        r'(?:\s*-\s*(\d+)\s*)',
+        r'S(\d+)[^\d]*(\d+)'
+    ]
+    for i, pat in enumerate(pats):
+        m = re.search(pat, fname, re.IGNORECASE)
         if m:
             return m.group(2) if i in [0, 1, 4] else m.group(1)
     return None
 
-def extract_quality(fname):
+def extract_quality(fname: str) -> str:
     qpats = [
         (r'\b(?:.*?(\d{3,4}[^\dp]*p).*?|.*?(\d{3,4}p))\b', lambda m: m.group(1) or m.group(2)),
         (r'[([{<]?\s*4k\s*[)\]}>]?', lambda m: "4k"),
@@ -37,6 +41,7 @@ def extract_quality(fname):
             return func(m)
     return "Unknown"
 
+# --- Thumbnail Function ---
 async def get_thumb(client: Client, msg: Message, mtype: str) -> str:
     t = await DvisPappa.get_thumbnail(msg.chat.id)
     if t:
@@ -50,6 +55,7 @@ async def get_thumb(client: Client, msg: Message, mtype: str) -> str:
         return p
     return None
 
+# --- Main Handler ---
 @Client.on_message(filters.private & (filters.document | filters.video | filters.audio))
 async def auto_rename(client: Client, msg: Message):
     uid = msg.from_user.id
@@ -67,6 +73,12 @@ async def auto_rename(client: Client, msg: Message):
     else:
         return await msg.reply_text("Unsupported File Type")
     
+    # Force video format if file extension is video type
+    ext = os.path.splitext(fname)[1].lower()
+    video_exts = [".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"]
+    if ext in video_exts:
+        mtype = "video"
+    
     if fid in RENAMES and (datetime.now() - RENAMES[fid]).seconds < 10:
         return
     RENAMES[fid] = datetime.now()
@@ -81,7 +93,6 @@ async def auto_rename(client: Client, msg: Message):
     if "{old_name}" in fmt:
         fmt = fmt.replace("{old_name}", os.path.splitext(fname)[0])
     
-    _, ext = os.path.splitext(fname)
     new_name = f"{fmt}{ext}"
     path = f"downloads/{new_name}"
     
