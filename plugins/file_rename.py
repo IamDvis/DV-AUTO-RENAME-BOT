@@ -1,125 +1,93 @@
 from pyrogram import Client, filters
-from pyrogram.errors import FloodWait
-from pyrogram.types import InputMediaDocument, Message
+from pyrogram.types import Message
 from PIL import Image
 from datetime import datetime
 from hachoir.metadata import extractMetadata
 from hachoir.parser import createParser
-from helper.utils import progress_for_pyrogram, humanbytes, convert  # Verification se related functions hata diye
+from helper.utils import progress_for_pyrogram, humanbytes, convert  # Verification related functions removed
 from helper.database import DvisPappa
 from config import Config
-import os
-import time
-import re
+import os, time, re
 
-# Dictionary to track ongoing renaming operations
+# Global dictionary for tracking renaming operations
 renaming_operations = {}
 
-# ----------------- Episode Extraction Patterns (TV Series ke liye) -----------------
-pattern1 = re.compile(r'S(\d+)(?:E|EP)(\d+)', re.IGNORECASE)
-pattern2 = re.compile(r'S(\d+)\s*(?:E|EP|-\s*EP)(\d+)', re.IGNORECASE)
-pattern3 = re.compile(r'(?:[([{<]\s*(?:E|EP)\s*(\d+)\s*[)\]}>])', re.IGNORECASE)
-pattern3_2 = re.compile(r'(?:\s*-\s*(\d+)\s*)')
-pattern4 = re.compile(r'S(\d+)[^\d]*(\d+)', re.IGNORECASE)
+# ------------------ Episode Extraction Patterns ------------------
+EPISODE_PATTERNS = [
+    re.compile(r'S(\d+)(?:E|EP)(\d+)', re.IGNORECASE),
+    re.compile(r'S(\d+)\s*(?:E|EP|-\s*EP)(\d+)', re.IGNORECASE),
+    re.compile(r'(?:[([{<]\s*(?:E|EP)\s*(\d+)\s*[)\]}>])', re.IGNORECASE),
+    re.compile(r'(?:\s*-\s*(\d+)\s*)'),
+    re.compile(r'S(\d+)[^\d]*(\d+)', re.IGNORECASE)
+]
 
-# ----------------- Quality Extraction Patterns -----------------
-pattern5 = re.compile(r'\b(?:.*?(\d{3,4}[^\dp]*p).*?|.*?(\d{3,4}p))\b', re.IGNORECASE)
-pattern6 = re.compile(r'[([{<]?\s*4k\s*[)\]}>]?', re.IGNORECASE)
-pattern7 = re.compile(r'[([{<]?\s*2k\s*[)\]}>]?', re.IGNORECASE)
-pattern8 = re.compile(r'[([{<]?\s*HdRip\s*[)\]}>]?|\bHdRip\b', re.IGNORECASE)
-pattern9 = re.compile(r'[([{<]?\s*4kX264\s*[)\]}>]?', re.IGNORECASE)
-pattern10 = re.compile(r'[([{<]?\s*4kx265\s*[)\]}>]?', re.IGNORECASE)
-
-def extract_quality(filename):
-    """Filename mein se quality extract karta hai."""
-    match5 = re.search(pattern5, filename)
-    if match5:
-        print("Matched Pattern 5")
-        quality5 = match5.group(1) or match5.group(2)
-        print(f"Quality: {quality5}")
-        return quality5
-
-    match6 = re.search(pattern6, filename)
-    if match6:
-        print("Matched Pattern 6")
-        quality6 = "4k"
-        print(f"Quality: {quality6}")
-        return quality6
-
-    match7 = re.search(pattern7, filename)
-    if match7:
-        print("Matched Pattern 7")
-        quality7 = "2k"
-        print(f"Quality: {quality7}")
-        return quality7
-
-    match8 = re.search(pattern8, filename)
-    if match8:
-        print("Matched Pattern 8")
-        quality8 = "HdRip"
-        print(f"Quality: {quality8}")
-        return quality8
-
-    match9 = re.search(pattern9, filename)
-    if match9:
-        print("Matched Pattern 9")
-        quality9 = "4kX264"
-        print(f"Quality: {quality9}")
-        return quality9
-
-    match10 = re.search(pattern10, filename)
-    if match10:
-        print("Matched Pattern 10")
-        quality10 = "4kx265"
-        print(f"Quality: {quality10}")
-        return quality10
-
-    unknown_quality = "Unknown"
-    print(f"Quality: {unknown_quality}")
-    return unknown_quality
-
-def extract_episode_number(filename):
-    """Filename se episode number extract karta hai. Agar valid TV series pattern nahi milta to None return kare."""
-    match = re.search(pattern1, filename)
-    if match:
-        print("Matched Pattern 1")
-        return match.group(2)
-    
-    match = re.search(pattern2, filename)
-    if match:
-        print("Matched Pattern 2")
-        return match.group(2)
-    
-    match = re.search(pattern3, filename)
-    if match:
-        print("Matched Pattern 3")
-        return match.group(1)
-    
-    match = re.search(pattern3_2, filename)
-    if match:
-        print("Matched Pattern 3_2")
-        return match.group(1)
-    
-    match = re.search(pattern4, filename)
-    if match:
-        print("Matched Pattern 4")
-        return match.group(2)
-    
+def extract_episode_number(filename: str) -> str:
+    """Filename se episode number extract karta hai. Agar koi valid pattern nahi milta, None return kare."""
+    for idx, pattern in enumerate(EPISODE_PATTERNS):
+        match = re.search(pattern, filename)
+        if match:
+            print(f"Matched Episode Pattern {idx+1}")
+            # For pattern indexes 0, 1, 4 use group(2); otherwise group(1)
+            return match.group(2) if idx in [0, 1, 4] else match.group(1)
     return None
 
-# ----------------- Example usage (Testing extraction functions) -----------------
-if __name__ == "__main__":
-    filename = "I Got a Cheat Skill in Another World and Became Unrivale.mp4.mp4"
-    episode_number = extract_episode_number(filename)
-    print(f"Extracted Episode Number: {episode_number}")
-    quality = extract_quality(filename)
-    print(f"Extracted Quality: {quality}")
+# ------------------ Quality Extraction Patterns ------------------
+QUALITY_PATTERNS = [
+    re.compile(r'\b(?:.*?(\d{3,4}[^\dp]*p).*?|.*?(\d{3,4}p))\b', re.IGNORECASE),
+    re.compile(r'[([{<]?\s*4k\s*[)\]}>]?', re.IGNORECASE),
+    re.compile(r'[([{<]?\s*2k\s*[)\]}>]?', re.IGNORECASE),
+    re.compile(r'[([{<]?\s*HdRip\s*[)\]}>]?|\bHdRip\b', re.IGNORECASE),
+    re.compile(r'[([{<]?\s*4kX264\s*[)\]}>]?', re.IGNORECASE),
+    re.compile(r'[([{<]?\s*4kx265\s*[)\]}>]?', re.IGNORECASE)
+]
 
-# ----------------- Auto Rename Bot Handler -----------------
+def extract_quality(filename: str) -> str:
+    """Filename se quality extract karta hai. Agar match na ho, 'Unknown' return kare."""
+    for idx, pattern in enumerate(QUALITY_PATTERNS):
+        match = re.search(pattern, filename)
+        if match:
+            print(f"Matched Quality Pattern {idx+1}")
+            if idx == 0:
+                quality = match.group(1) or match.group(2)
+                if quality:
+                    return quality
+            elif idx == 1:
+                return "4k"
+            elif idx == 2:
+                return "2k"
+            elif idx == 3:
+                return "HdRip"
+            elif idx == 4:
+                return "4kX264"
+            elif idx == 5:
+                return "4kx265"
+    print("No quality pattern matched, returning 'Unknown'")
+    return "Unknown"
+
+# ------------------ Thumbnail Processing ------------------
+async def process_thumbnail(client: Client, message: Message, media_type: str) -> str:
+    """Agar custom thumbnail available hai, use use karo; warna video thumbnail se best quality thumb select karo."""
+    ph_path = None
+    c_thumb = await DvisPappa.get_thumbnail(message.chat.id)
+    if c_thumb:
+        ph_path = await client.download_media(c_thumb)
+        print(f"Custom thumbnail downloaded: {ph_path}")
+    elif media_type == "video" and message.video.thumbs:
+        # Select best thumbnail based on width
+        best_thumb = max(message.video.thumbs, key=lambda t: t.width if hasattr(t, 'width') and t.width else 0)
+        ph_path = await client.download_media(best_thumb.file_id)
+        if ph_path:
+            with Image.open(ph_path) as img:
+                # Resize only if image width is more than 320
+                if img.width > 320:
+                    new_size = (320, 320)
+                    img = img.convert("RGB").resize(new_size, Image.LANCZOS)
+                    img.save(ph_path, "JPEG")
+    return ph_path
+
+# ------------------ Auto Rename Bot Handler ------------------
 @Client.on_message(filters.private & (filters.document | filters.video | filters.audio))
-async def auto_rename_files(client, message):
-    # Verification check block hata diya gaya hai.
-    
+async def auto_rename_files(client: Client, message: Message):
     user_id = message.from_user.id
     format_template = await DvisPappa.get_format_template(user_id)
     media_preference = await DvisPappa.get_media_preference(user_id)
@@ -127,7 +95,7 @@ async def auto_rename_files(client, message):
     if not format_template:
         return await message.reply_text("Pehle /autorename command se format set karo.")
     
-    # File details extract karo
+    # File details extraction
     if message.document:
         file_id = message.document.file_id
         file_name = message.document.file_name
@@ -148,46 +116,43 @@ async def auto_rename_files(client, message):
     
     print(f"Original File Name: {file_name}")
     
+    # Skip if file recently processed
     if file_id in renaming_operations:
-        elapsed_time = (datetime.now() - renaming_operations[file_id]).seconds
-        if elapsed_time < 10:
-            print("Recent rename operation chal rahi hai, file ignore kar rahe hain.")
+        elapsed = (datetime.now() - renaming_operations[file_id]).seconds
+        if elapsed < 10:
+            print("Recent rename operation chal rahi hai, skipping file.")
             return
-    
     renaming_operations[file_id] = datetime.now()
     
-    # Episode number extract karo (TV series ke liye)
+    # Episode extraction
     episode_number = extract_episode_number(file_name)
     if episode_number:
         print(f"Extracted Episode Number: {episode_number}")
-        placeholders = ["episode", "Episode", "EPISODE", "{episode}"]
-        for placeholder in placeholders:
+        for placeholder in ["episode", "Episode", "EPISODE", "{episode}"]:
             if placeholder in format_template:
                 format_template = format_template.replace(placeholder, str(episode_number), 1)
     else:
-        print("Episode pattern nahi mila (shayed movie hai)")
+        print("No episode pattern found (shayed movie file)")
     
-    # Quality extract karke replace karo
-    quality_placeholders = ["quality", "Quality", "QUALITY", "{quality}"]
+    # Quality extraction
     extracted_quality = extract_quality(file_name)
-    for quality_placeholder in quality_placeholders:
-        if quality_placeholder in format_template:
-            format_template = format_template.replace(quality_placeholder, extracted_quality)
+    for placeholder in ["quality", "Quality", "QUALITY", "{quality}"]:
+        if placeholder in format_template:
+            format_template = format_template.replace(placeholder, extracted_quality)
     
-    # Old file name replacement: agar "{old_name}" placeholder use hua ho to replace karo
+    # Replace old file name placeholder if present
     if "{old_name}" in format_template:
         old_name = os.path.splitext(file_name)[0]
         format_template = format_template.replace("{old_name}", old_name)
     
-    # New file name aur file path set karo
+    # Prepare new file name and path
     _, file_extension = os.path.splitext(file_name)
     new_file_name = f"{format_template}{file_extension}"
     file_path = f"downloads/{new_file_name}"
     
-    download_msg = await message.reply_text(text="Download start ho raha hai...")
-    
+    download_msg = await message.reply_text("Download start ho raha hai...")
     try:
-        path = await client.download_media(
+        await client.download_media(
             message=message,
             file_name=file_path,
             progress=progress_for_pyrogram,
@@ -197,47 +162,34 @@ async def auto_rename_files(client, message):
         del renaming_operations[file_id]
         return await download_msg.edit(str(e))
     
-    # Duration extraction with improved error handling
+    # Duration extraction
     duration = 0
     try:
         parser = createParser(file_path)
         metadata = extractMetadata(parser)
-        if metadata is not None and metadata.has("duration"):
-            duration = metadata.get('duration').seconds
-        else:
-            duration = 0
+        if metadata and metadata.has("duration"):
+            duration = metadata.get("duration").seconds
     except Exception as e:
-        print(f"Duration extract karne me error: {e}")
-        duration = 0
+        print(f"Duration extraction error: {e}")
     
     upload_msg = await download_msg.edit("Upload start ho raha hai...")
-    ph_path = None
-    c_caption = await DvisPappa.get_caption(message.chat.id)
-    c_thumb = await DvisPappa.get_thumbnail(message.chat.id)
     
-    # Default caption format, quality bhi add kiya gaya hai:
+    # Caption formatting (quality bhi include)
+    c_caption = await DvisPappa.get_caption(message.chat.id)
     caption = c_caption.format(
         filename=new_file_name,
         filesize=humanbytes(file_size),
         duration=convert(duration),
         quality=extracted_quality
-    ) if c_caption else f"📕Name ➠ : {new_file_name}\n\n🔗 Size ➠ : {humanbytes(file_size)}\n\n⏰ Duration ➠ : {convert(duration)}\n\n🎥 Quality ➠ : {extracted_quality}"
+    ) if c_caption else (
+        f"📕Name ➠ : {new_file_name}\n\n"
+        f"🔗 Size ➠ : {humanbytes(file_size)}\n\n"
+        f"⏰ Duration ➠ : {convert(duration)}\n\n"
+        f"🎥 Quality ➠ : {extracted_quality}"
+    )
     
-    # Thumbnail download process
-    if c_thumb:
-        ph_path = await client.download_media(c_thumb)
-        print(f"Thumbnail download ho gaya: {ph_path}")
-    elif media_type == "video" and message.video.thumbs:
-        # Select best quality thumbnail from available ones
-        best_thumb = max(message.video.thumbs, key=lambda t: t.width if hasattr(t, 'width') and t.width else 0)
-        ph_path = await client.download_media(best_thumb.file_id)
-        if ph_path:
-            with Image.open(ph_path) as img:
-                # Agar image already high resolution hai, to resizing na karein; warna resize karke LANCZOS filter use karein
-                if img.width > 320:
-                    new_size = (320, 320)
-                    img = img.convert("RGB").resize(new_size, Image.LANCZOS)
-                    img.save(ph_path, "JPEG")
+    # Process thumbnail with improved quality
+    ph_path = await process_thumbnail(client, message, media_type)
     
     try:
         if media_type == "document":
