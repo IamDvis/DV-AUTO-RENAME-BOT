@@ -171,10 +171,15 @@ async def auto_rename_files(client, message):
     
     # Quality extract karke replace karo
     quality_placeholders = ["quality", "Quality", "QUALITY", "{quality}"]
+    extracted_quality = extract_quality(file_name)
     for quality_placeholder in quality_placeholders:
         if quality_placeholder in format_template:
-            extracted_quality = extract_quality(file_name)
             format_template = format_template.replace(quality_placeholder, extracted_quality)
+    
+    # Old file name replacement: agar "{old_name}" placeholder use hua ho to replace karo
+    if "{old_name}" in format_template:
+        old_name = os.path.splitext(file_name)[0]
+        format_template = format_template.replace("{old_name}", old_name)
     
     # New file name aur file path set karo
     _, file_extension = os.path.splitext(file_name)
@@ -212,12 +217,13 @@ async def auto_rename_files(client, message):
     c_caption = await DvisPappa.get_caption(message.chat.id)
     c_thumb = await DvisPappa.get_thumbnail(message.chat.id)
     
-    # Default caption format as per desired format:
+    # Default caption format as per desired format, ab quality bhi add kiya gaya hai:
     caption = c_caption.format(
         filename=new_file_name,
         filesize=humanbytes(file_size),
-        duration=convert(duration)
-    ) if c_caption else f"📕Name ➠ : {new_file_name}\n\n🔗 Size ➠ : {humanbytes(file_size)}\n\n⏰ Duration ➠ : {convert(duration)}"
+        duration=convert(duration),
+        quality=extracted_quality
+    ) if c_caption else f"📕Name ➠ : {new_file_name}\n\n🔗 Size ➠ : {humanbytes(file_size)}\n\n⏰ Duration ➠ : {convert(duration)}\n\n🎥 Quality ➠ : {extracted_quality}"
     
     # Thumbnail download process
     if c_thumb:
