@@ -225,17 +225,17 @@ async def auto_rename_files(client, message):
         quality=extracted_quality
     ) if c_caption else f"📕Name ➠ : {new_file_name}\n\n🔗 Size ➠ : {humanbytes(file_size)}\n\n⏰ Duration ➠ : {convert(duration)}\n\n🎥 Quality ➠ : {extracted_quality}"
     
-    # Thumbnail download process
+    # Thumbnail download process with improved resize for better quality
     if c_thumb:
         ph_path = await client.download_media(c_thumb)
         print(f"Thumbnail download ho gaya: {ph_path}")
     elif media_type == "video" and message.video.thumbs:
         ph_path = await client.download_media(message.video.thumbs[0].file_id)
         if ph_path:
-            Image.open(ph_path).convert("RGB").save(ph_path)
-            img = Image.open(ph_path)
-            img.resize((320, 320))
-            img.save(ph_path, "JPEG")
+            with Image.open(ph_path) as img:
+                img = img.convert("RGB")
+                img = img.resize((320, 320), Image.LANCZOS)
+                img.save(ph_path, "JPEG")
     
     try:
         if media_type == "document":
