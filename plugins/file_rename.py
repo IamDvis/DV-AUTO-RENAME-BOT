@@ -79,7 +79,7 @@ def extract_quality(filename):
     return unknown_quality
 
 def extract_episode_number(filename):
-    """Filename se episode number extract karta hai. Agar TV series ka valid pattern nahi milta to None return kare."""
+    """Filename se episode number extract karta hai. Agar valid TV series pattern nahi milta to None return kare."""
     match = re.search(pattern1, filename)
     if match:
         print("Matched Pattern 1")
@@ -105,7 +105,7 @@ def extract_episode_number(filename):
         print("Matched Pattern 4")
         return match.group(2)
     
-    # Agar koi valid episode pattern nahi mila (movie file ho sakti hai), to None return karo.
+    # Agar koi valid episode pattern nahi mila, to None return karo.
     return None
 
 # ----------------- Example usage (Testing extraction functions) -----------------
@@ -132,14 +132,17 @@ async def auto_rename_files(client, message):
     if message.document:
         file_id = message.document.file_id
         file_name = message.document.file_name
+        file_size = message.document.file_size
         media_type = media_preference or "document"
     elif message.video:
         file_id = message.video.file_id
         file_name = f"{message.video.file_name}.mp4"
+        file_size = message.video.file_size
         media_type = media_preference or "video"
     elif message.audio:
         file_id = message.audio.file_id
         file_name = f"{message.audio.file_name}.mp3"
+        file_size = message.audio.file_size
         media_type = media_preference or "audio"
     else:
         return await message.reply_text("Unsupported File Type")
@@ -212,9 +215,9 @@ async def auto_rename_files(client, message):
     # Default caption format as per desired format:
     caption = c_caption.format(
         filename=new_file_name,
-        filesize=humanbytes(message.document.file_size),
+        filesize=humanbytes(file_size),
         duration=convert(duration)
-    ) if c_caption else f"📕Name ➠ : {new_file_name}\n\n🔗 Size ➠ : {humanbytes(message.document.file_size)}\n\n⏰ Duration ➠ : {convert(duration)}"
+    ) if c_caption else f"📕Name ➠ : {new_file_name}\n\n🔗 Size ➠ : {humanbytes(file_size)}\n\n⏰ Duration ➠ : {convert(duration)}"
     
     # Thumbnail download process
     if c_thumb:
