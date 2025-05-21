@@ -119,7 +119,7 @@ async def auto_rename(client: Client, msg: Message):
                 message=msg, 
                 file_name=path, 
                 progress=progress_for_pyrogram, 
-                progress_args=("Download Started...", dmsg, time.time())
+                progress_args=("🚀 Download Started...", dmsg, time.time())
             )
         except Exception as e:
             del RENAMES[fid]
@@ -138,9 +138,11 @@ async def auto_rename(client: Client, msg: Message):
         try:
             cap = await DvisPappa.get_caption(msg.chat.id)
             caption = (cap.format(filename=new_name, filesize=humanbytes(fsize), duration=convert(dur), quality=q)
-                       if cap else f"📕Name ➠ : {new_name}\n\n🔗 Size ➠ : {humanbytes(fsize)}\n\n⏰ Duration ➠ : {convert(dur)}\n\n🎥 Quality ➠ : {q}")
+                      # if cap else f"📕Name ➠ : {new_name}\n\n🔗 Size ➠ : {humanbytes(fsize)}\n\n⏰ Duration ➠ : {convert(dur)}\n\n🎥 Quality ➠ : {q}")
+                       if cap else f"{new_name}")
         except Exception as e:
             caption = f"📕Name ➠ : {new_name}\n\n🔗 Size ➠ : {humanbytes(fsize)}\n\n⏰ Duration ➠ : {convert(dur)}\n\n🎥 Quality ➠ : {q}"
+            caption = f"{new_name}"
         
         thumb = await get_thumb(client, msg, mtype)
         
@@ -152,7 +154,7 @@ async def auto_rename(client: Client, msg: Message):
                     thumb=thumb, 
                     caption=caption, 
                     progress=progress_for_pyrogram, 
-                    progress_args=("Upload Started...", umsg, time.time())
+                    progress_args=("📤 Upload Started...", umsg, time.time())
                 )
             elif mtype == "video":
                 await client.send_video(
@@ -162,7 +164,7 @@ async def auto_rename(client: Client, msg: Message):
                     thumb=thumb, 
                     duration=dur,
                     progress=progress_for_pyrogram, 
-                    progress_args=("Upload Started...", umsg, time.time())
+                    progress_args=("📤 Upload Started...", umsg, time.time())
                 )
             elif mtype == "audio":
                 await client.send_audio(
@@ -172,7 +174,7 @@ async def auto_rename(client: Client, msg: Message):
                     thumb=thumb, 
                     duration=dur,
                     progress=progress_for_pyrogram, 
-                    progress_args=("Upload Started...", umsg, time.time())
+                    progress_args=("📤 Upload Started...", umsg, time.time())
                 )
         except Exception as e:
             if os.path.exists(path):
