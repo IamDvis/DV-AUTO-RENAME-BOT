@@ -1,6 +1,6 @@
 from pyrogram import Client, filters
 from pyrogram.types import Message
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from datetime import datetime
 from hachoir.metadata import extractMetadata
 from hachoir.parser import createParser
@@ -43,16 +43,54 @@ def extract_quality(fname: str) -> str:
 
 # --- Thumbnail Function ---
 async def get_thumb(client: Client, msg: Message, mtype: str) -> str:
-    t = await DvisPappa.get_thumbnail(msg.chat.id)
-    if t:
-        return await client.download_media(t)
-    elif mtype == "video" and msg.video.thumbs:
+    t_file_id = await DvisPappa.get_thumbnail(msg.chat.id)
+    downloaded_thumb_path = None
+
+    if t_file_id:
+        try:
+            downloaded_thumb_path = await client.download_media(t_file_id)
+            if downloaded_thumb_path:
+                try:
+                    with Image.open(downloaded_thumb_path) as img:
+                        if img.width > 320:
+                            img.convert("RGB").resize((320, 320), Image.LANCZOS).save(downloaded_thumb_path, "JPEG")
+                    return downloaded_thumb_path
+                except UnidentifiedImageError:
+                    print(f"PIL.UnidentifiedImageError: Cannot identify image file: {downloaded_thumb_path}. Removing corrupt file.")
+                    if os.path.exists(downloaded_thumb_path):
+                        os.remove(downloaded_thumb_path)
+                except Exception as e:
+                    print(f"Error processing custom thumbnail {downloaded_thumb_path}: {e}")
+                    if os.path.exists(downloaded_thumb_path):
+                        os.remove(downloaded_thumb_path)
+        except Exception as e:
+            print(f"Error downloading custom thumbnail {t_file_id}: {e}")
+            # FileReferenceExpired ya koi aur download error yahan catch hoga
+            pass # Fallback to video thumbnail or None
+
+    if mtype == "video" and msg.video and msg.video.thumbs:
         best = max(msg.video.thumbs, key=lambda t: t.width if hasattr(t, 'width') and t.width else 0)
-        p = await client.download_media(best.file_id)
-        with Image.open(p) as img:
-            if img.width > 320:
-                img.convert("RGB").resize((320,320), Image.LANCZOS).save(p, "JPEG")
-        return p
+        if best:
+            try:
+                downloaded_thumb_path = await client.download_media(best.file_id)
+                if downloaded_thumb_path:
+                    try:
+                        with Image.open(downloaded_thumb_path) as img:
+                            if img.width > 320:
+                                img.convert("RGB").resize((320, 320), Image.LANCZOS).save(downloaded_thumb_path, "JPEG")
+                        return downloaded_thumb_path
+                    except UnidentifiedImageError:
+                        print(f"PIL.UnidentifiedImageError: Cannot identify video thumbnail file: {downloaded_thumb_path}. Removing corrupt file.")
+                        if os.path.exists(downloaded_thumb_path):
+                            os.remove(downloaded_thumb_path)
+                    except Exception as e:
+                        print(f"Error processing video thumbnail {downloaded_thumb_path}: {e}")
+                        if os.path.exists(downloaded_thumb_path):
+                            os.remove(downloaded_thumb_path)
+            except Exception as e:
+                print(f"Error downloading video thumbnail {best.file_id}: {e}")
+                pass # Return None if video thumbnail also fails
+
     return None
 
 # --- Main Handler ---
@@ -61,19 +99,20 @@ async def auto_rename(client: Client, msg: Message):
     uid = msg.from_user.id
     fmt = await DvisPappa.get_format_template(uid)
     mtype = (await DvisPappa.get_media_preference(uid)) or "document"
+    
     if not fmt:
         return await msg.reply_text("⚠️ Pehle /autorename command se format set karo.")
     
+    fid, fname, fsize = None, None, None
     if msg.document:
         fid, fname, fsize = msg.document.file_id, msg.document.file_name, msg.document.file_size
     elif msg.video:
-        fid, fname, fsize = msg.video.file_id, f"{msg.video.file_name}.mp4", msg.video.file_size
+        fid, fname, fsize = msg.video.file_id, f"{msg.video.file_name or 'video'}.mp4", msg.video.file_size
     elif msg.audio:
-        fid, fname, fsize = msg.audio.file_id, f"{msg.audio.file_name}.mp3", msg.audio.file_size
+        fid, fname, fsize = msg.audio.file_id, f"{msg.audio.file_name or 'audio'}.mp3", msg.audio.file_size
     else:
         return await msg.reply_text("❌ Unsupported File Type")
     
-    # Force video format if file extension indicates video
     ext = os.path.splitext(fname)[1].lower()
     video_exts = [".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"]
     if ext in video_exts:
@@ -101,7 +140,8 @@ async def auto_rename(client: Client, msg: Message):
         await client.download_media(message=msg, file_name=path, progress=progress_for_pyrogram, progress_args=("Download Started...", dmsg, time.time()))
     except Exception as e:
         del RENAMES[fid]
-        return await dmsg.edit(str(e))
+        if os.path.exists(path): os.remove(path) # Download fail hone par file clean karo
+        return await dmsg.edit(f"❌ Download Error: {e}")
     
     dur = 0
     try:
@@ -109,6 +149,7 @@ async def auto_rename(client: Client, msg: Message):
         if meta and meta.has("duration"):
             dur = meta.get("duration").seconds
     except Exception as e:
+        print(f"Error extracting metadata: {e}")
         dur = 0
     
     umsg = await dmsg.edit("📤 Upload starting...")
@@ -126,12 +167,13 @@ async def auto_rename(client: Client, msg: Message):
         elif mtype == "audio":
             await client.send_audio(msg.chat.id, audio=path, caption=caption, thumb=thumb, duration=dur, progress=progress_for_pyrogram, progress_args=("Upload Started...", umsg, time.time()))
     except Exception as e:
-        os.remove(path)
-        if thumb: os.remove(thumb)
+        print(f"Upload Error: {e}") # Upload error ko print karo
+        if os.path.exists(path): os.remove(path)
+        if thumb and os.path.exists(thumb): os.remove(thumb)
         del RENAMES[fid]
-        return await umsg.edit(f"❌ Error: {e}")
+        return await umsg.edit(f"❌ Upload Error: {e}")
     
     await dmsg.delete()
-    os.remove(path)
-    if thumb: os.remove(thumb)
+    if os.path.exists(path): os.remove(path)
+    if thumb and os.path.exists(thumb): os.remove(thumb)
     del RENAMES[fid]
