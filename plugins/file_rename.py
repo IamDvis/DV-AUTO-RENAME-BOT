@@ -50,7 +50,7 @@ def extract_quality(fname: str) -> str:
         (r'[([{<]?\s*2k\s*[)\]}>]?', lambda m: "2k"),
         (r'[([{<]?\s*4kX264\s*[)\]}>]?', lambda m: "4kX264"),
         (r'[([{<]?\s*4kx265\s*[)\]}>]?', lambda m: "4kx265"),
-        (r'[([{<]?\s*WEB[.\- ]?DL\s*[)\]}>]?|\bWEB[.\- ]?DL\b', lambda m: "WEB-DL"), # Refined WEB-DL pattern
+        (r'\bWEB[.\- ]*DL\b', lambda m: "WEB-DL"), # Refined WEB-DL pattern for better detection
         (r'[([{<]?\s*HdRip\s*[)\]}>]?|\bHdRip\b', lambda m: "HdRip"),
         # Generic resolution patterns last
         (r'\b(?:.*?(\d{3,4}[^\dp]*p).*?|.*?(\d{3,4}p))\b', lambda m: m.group(1) or m.group(2)),
