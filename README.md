@@ -1,23 +1,3 @@
-<img src="https://files.catbox.moe/4kwe69.jpg" alt="logo" target="/blank">
-
-<h1 align="center">
- <b><a href="https://t.me/net_pro_max" target="/blank"> Auto Rename Bot </a></>
-</h1>
-
-<p align="center">🩵 Thanks for Being Here 🩵</p>
-
-
-### CONFIGS VARIABLES
-
-* `BOT_TOKEN` - Get bot token from @BotFather
-* `API_ID` - From my.telegram.org
-* `API_HASH` - From my.telegram.org
-* `ADMIN` - Admin user id
-* `LOG_CHANNEL` - Bot Log Channel Id startswith -100 must.
-* `DB_URL` - Mongo Database URL from https://cloud.mongodb.com
-* `DB_NAME` - Your database name from mongoDB. (Optional)
-* `FORCE_SUB` - Your force sub channel username without @ (Optional)
-* `START_PIC` - Start message photo. (Optional)
 
 
 
@@ -40,21 +20,6 @@
 
 
 
-### FEATURES
- - Renames very fast .
- - Permanent Thumbnail support.
- - Supports Broadcasts.
- - Set custom caption.
- - Has a custom Start-up pic.
- - Force subscribe available.
- - Supports ulimited renaming at a time.
- - Deploy to Koyeb + Heroku + Railway.
- - Automatically rename your files
- - Set mediatype to upload filetype
- - Developer Service 24x7. 🔥
-
-
-
 ### ALL COMMANDS
 
 ```
@@ -73,11 +38,3 @@ status - Check bot status [FOR ADMINS USE ONLY].
 ```
 
 
-### 😍 BOTS CHANNEL 😍
-- [Network](https://t.me/net_pro_max)
-- [Dvis](https://t.me/DvisDmBot)
-
-### ❤️ RESPECTING ❤️
-- [JishuDeveloper](https://github.com/JishuDeveloper)
-- [Trippy](https://github.com/Trippy07) 
-- [lntechnical](https://github.com/lntechnical2)
