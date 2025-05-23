@@ -28,6 +28,21 @@ def extract_episode(fname: str) -> str:
     return None
 
 
+def extract_season(fname: str) -> str:
+    s_pats = [
+        r'S(\d+)(?:E|EP)(\d+)',
+        r'S(\d+)\s*(?:E|EP|-\s*EP)(\d+)',
+        r'S(\d+)[^\d]*(\d+)',
+        r'\bseason\s*(\d+)\b',
+        r'\bs(\d+)\b'
+    ]
+    for pat in s_pats:
+        m = re.search(pat, fname, re.IGNORECASE)
+        if m:
+            return m.group(1)
+    return None
+
+
 def extract_quality(fname: str) -> str:
     qpats = [
         (r'\b(?:.*?(\d{3,4}[^\dp]*p).*?|.*?(\d{3,4}p))\b', lambda m: m.group(1) or m.group(2)),
@@ -106,6 +121,12 @@ async def auto_rename(client: Client, msg: Message):
             for ph in ["episode", "Episode", "EPISODE", "{episode}"]:
                 fmt = fmt.replace(ph, ep, 1)
         
+        # Extract season number
+        season_num = extract_season(fname or "")
+        if season_num:
+            for ph in ["season", "Season", "SEASON", "{season}"]:
+                fmt = fmt.replace(ph, season_num, 1)
+
         q = extract_quality(fname or "")
         for ph in ["quality", "Quality", "QUALITY", "{quality}"]:
             fmt = fmt.replace(ph, q)
@@ -139,7 +160,11 @@ async def auto_rename(client: Client, msg: Message):
 
         umsg = await dmsg.edit("📤 Upload starting...")
 
-        default_caption = ({new_name}
+        default_caption = (
+            f"📕Name ➠ : {new_name}\n\n"
+            f"🔗 Size ➠ : {humanbytes(fsize)}\n\n"
+            f"⏰ Duration ➠ : {convert(dur)}\n\n"
+            f"🎥 Quality ➠ : {q}"
         )
         
         caption = default_caption
@@ -152,7 +177,8 @@ async def auto_rename(client: Client, msg: Message):
                         filename=new_name,
                         filesize=humanbytes(fsize),
                         duration=convert(dur),
-                        quality=q
+                        quality=q,
+                        season=season_num if season_num else "" # Add season placeholder
                     )
                 except KeyError as ke:
                     print(f"Warning: Custom caption formatting failed due to missing key: {ke}. Using default caption.")
