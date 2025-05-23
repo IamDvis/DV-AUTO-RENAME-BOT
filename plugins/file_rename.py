@@ -90,7 +90,7 @@ async def auto_rename(client: Client, msg: Message):
         return await msg.reply_text(f"⚠️ Database Error: {str(e)}")
 
     if not fmt:
-        return await msg.reply_text("⚠️ Pehle /autorename command se format set karo.")
+        return await msg.reply_text("⚠️ ᴘєʜʟє /autorename ᴄσϻϻᴧηᴅ ꜱє ꜰσʀϻᴧᴛ ꜱєᴛ ᴋᴧʀσ.")
 
     try:
         if msg.document:
@@ -102,9 +102,9 @@ async def auto_rename(client: Client, msg: Message):
             fid, fname, fsize = msg.audio.file_id, msg.audio.file_name or f"audio_{msg.audio.file_unique_id}", msg.audio.file_size
             fname = f"{os.path.splitext(fname)[0]}.mp3" if not os.path.splitext(fname)[1] else fname
         else:
-            return await msg.reply_text("❌ Unsupported File Type")
+            return await msg.reply_text("❌ ᴜηꜱᴜᴘᴘσʀᴛєᴅ ꜰɪʟє ᴛʏᴘє")
     except Exception as e:
-        return await msg.reply_text(f"❌ File Info Error: {str(e)}")
+        return await msg.reply_text(f"❌ ꜰɪʟє ɪηꜰσ єʀʀσʀ: {str(e)}")
 
     ext = os.path.splitext(fname)[1].lower() if fname else ".mp4"
     video_exts = [".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"]
@@ -137,13 +137,13 @@ async def auto_rename(client: Client, msg: Message):
         new_name = f"{fmt}{ext}"
         path = f"downloads/{new_name}"
 
-        dmsg = await msg.reply_text("🚀 Download starting...")
+        dmsg = await msg.reply_text("🚀 ᴅσᴡηʟσᴧᴅ ꜱᴛᴧʀᴛɪηɢ...")
         try:
             await client.download_media(
                 message=msg,
                 file_name=path,
                 progress=progress_for_pyrogram,
-                progress_args=("🚀 Download Started...", dmsg, time.time())
+                progress_args=("🚀 ᴅσᴡηʟσᴧᴅ ꜱᴛᴧʀᴛєᴅ...", dmsg, time.time())
             )
         except Exception as e:
             del RENAMES[fid]
@@ -158,9 +158,17 @@ async def auto_rename(client: Client, msg: Message):
             print(f"Metadata Error: {e}")
             dur = 0
 
-        umsg = await dmsg.edit("📤 Upload starting...")
+        umsg = await dmsg.edit("📤 ᴜᴘʟσᴧᴅ ꜱᴛᴧʀᴛɪηɢ...")
 
-        default_caption = (f"{new_name}"
+        default_caption = (
+            f"❖ **ꜱᴜᴘᴘσʀᴛ** ➛ **@TGEliteHub** ━━━━━━━━━━━━━━━━━━━━\n"
+            f"➜ **єᴘɪꜱσᴅє** ⇢ {ep if ep else 'N/A'} ( **ꜱєᴧꜱση** {season_num if season_num else 'N/A'} )\n"
+            f"➜ **ʟᴧηɢᴜᴧɢє** ⇢ **ʜɪηᴅɪ**\n"
+            f"➜ **ǫᴜᴧʟɪᴛʏ** ⇢ {q}\n"
+            f"➜ **ꜱɪᴢє** ⇢ {humanbytes(fsize)}\n"
+            f"➜ **ᴅᴜʀᴧᴛɪση** ⇢ {convert(dur)}\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"❖ **ϻᴧᴅє ʙʏ** ➛ **@TGUrlsHub**"
         )
         
         caption = default_caption
@@ -174,16 +182,23 @@ async def auto_rename(client: Client, msg: Message):
                         filesize=humanbytes(fsize),
                         duration=convert(dur),
                         quality=q,
-                        season=season_num if season_num else "" # Add season placeholder
+                        season=season_num if season_num else "",
+                        episode=ep if ep else ""
                     )
                 except KeyError as ke:
-                    print(f"Warning: Custom caption formatting failed due to missing key: {ke}. Using default caption.")
+                    error_msg = f"⚠️ ᴄᴜꜱᴛσϻ ᴄᴧᴘᴛɪση ϻєɪη ɪηᴠᴧʟɪᴅ ᴘʟᴧᴄєʜσʟᴅєʀ: {ke}. ᴅєꜰᴧᴜʟᴛ ᴄᴧᴘᴛɪση ᴜꜱє ʜσ ʀᴧʜᴧ ʜᴧɪ."
+                    print(f"Warning: {error_msg}")
+                    await msg.reply_text(error_msg)
                     caption = default_caption
                 except Exception as e:
-                    print(f"Error formatting custom caption: {e}. Using default caption.")
+                    error_msg = f"❌ ᴄᴜꜱᴛσϻ ᴄᴧᴘᴛɪση ꜰσʀϻᴧᴛ ϻєɪη єʀʀσʀ: {e}. ᴅєꜰᴧᴜʟᴛ ᴄᴧᴘᴛɪση ᴜꜱє ʜσ ʀᴧʜᴧ ʜᴧɪ."
+                    print(f"Error: {error_msg}")
+                    await msg.reply_text(error_msg)
                     caption = default_caption
         except Exception as e:
-            print(f"Error fetching custom caption from database: {e}. Using default caption.")
+            error_msg = f"❌ ᴅᴧᴛᴧʙᴧꜱє ꜱє ᴄᴜꜱᴛσϻ ᴄᴧᴘᴛɪση ꜰєᴛᴄʜ ᴋᴧʀηє ϻєɪη єʀʀσʀ: {e}. ᴅєꜰᴧᴜʟᴛ ᴄᴧᴘᴛɪση ᴜꜱє ʜσ ʀᴧʜᴧ ʜᴧɪ."
+            print(f"Error: {error_msg}")
+            await msg.reply_text(error_msg)
             caption = default_caption
 
         thumb = await get_thumb(client, msg, mtype)
@@ -196,7 +211,7 @@ async def auto_rename(client: Client, msg: Message):
                     thumb=thumb,
                     caption=caption,
                     progress=progress_for_pyrogram,
-                    progress_args=("📤 Upload Started...", umsg, time.time())
+                    progress_args=("📤 ᴜᴘʟσᴧᴅ ꜱᴛᴧʀᴛєᴅ...", umsg, time.time())
                 )
             elif mtype == "video":
                 await client.send_video(
@@ -206,7 +221,7 @@ async def auto_rename(client: Client, msg: Message):
                     thumb=thumb,
                     duration=dur,
                     progress=progress_for_pyrogram,
-                    progress_args=("📤 Upload Started...", umsg, time.time())
+                    progress_args=("📤 ᴜᴘʟσᴧᴅ ꜱᴛᴧʀᴛєᴅ...", umsg, time.time())
                 )
             elif mtype == "audio":
                 await client.send_audio(
@@ -216,7 +231,7 @@ async def auto_rename(client: Client, msg: Message):
                     thumb=thumb,
                     duration=dur,
                     progress=progress_for_pyrogram,
-                    progress_args=("📤 Upload Started...", umsg, time.time())
+                    progress_args=("📤 ᴜᴘʟσᴧᴅ ꜱᴛᴧʀᴛєᴅ...", umsg, time.time())
                 )
         except Exception as e:
             if os.path.exists(path):
@@ -237,4 +252,5 @@ async def auto_rename(client: Client, msg: Message):
         if fid in RENAMES:
             del RENAMES[fid]
         return await msg.reply_text(f"❌ Main Error: {str(e)}")
+
 
