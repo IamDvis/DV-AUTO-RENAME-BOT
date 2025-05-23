@@ -2,8 +2,8 @@ from pyrogram import Client, filters
 from pyrogram.types import Message
 from PIL import Image
 from datetime import datetime
-from hachoir.metadata import extractMetadata
-from hachoir.parser import createParser
+# from hachoir.metadata import extractMetadata # Ab iski zaroorat nahi
+# from hachoir.parser import createParser     # Ab iski zaroorat nahi
 from helper.utils import progress_for_pyrogram, humanbytes, convert
 from helper.database import DvisPappa
 from config import Config
@@ -87,20 +87,24 @@ async def auto_rename(client: Client, msg: Message):
         fmt = await DvisPappa.get_format_template(uid)
         mtype = (await DvisPappa.get_media_preference(uid)) or "document"
     except Exception as e:
-        return await msg.reply_text(f"⚠️ Database Error: {str(e)}")
+        return await msg.reply_text(f"⚠️ ᴅᴧᴛᴧʙᴧꜱє єʀʀσʀ: {str(e)}")
 
     if not fmt:
         return await msg.reply_text("⚠️ ᴘєʜʟє /autorename ᴄσϻϻᴧηᴅ ꜱє ꜰσʀϻᴧᴛ ꜱєᴛ ᴋᴧʀσ.")
 
+    # duration ko pehle hi initialize kar do
+    dur = 0
     try:
         if msg.document:
             fid, fname, fsize = msg.document.file_id, msg.document.file_name, msg.document.file_size
         elif msg.video:
             fid, fname, fsize = msg.video.file_id, msg.video.file_name or f"video_{msg.video.file_unique_id}", msg.video.file_size
             fname = f"{os.path.splitext(fname)[0]}.mp4" if not os.path.splitext(fname)[1] else fname
+            dur = msg.video.duration if msg.video.duration else 0 # Video duration yahan se milegi
         elif msg.audio:
             fid, fname, fsize = msg.audio.file_id, msg.audio.file_name or f"audio_{msg.audio.file_unique_id}", msg.audio.file_size
             fname = f"{os.path.splitext(fname)[0]}.mp3" if not os.path.splitext(fname)[1] else fname
+            dur = msg.audio.duration if msg.audio.duration else 0 # Audio duration yahan se milegi
         else:
             return await msg.reply_text("❌ ᴜηꜱᴜᴘᴘσʀᴛєᴅ ꜰɪʟє ᴛʏᴘє")
     except Exception as e:
@@ -149,14 +153,15 @@ async def auto_rename(client: Client, msg: Message):
             del RENAMES[fid]
             return await dmsg.edit(f"❌ Download Error: {str(e)}")
 
-        dur = 0
-        try:
-            meta = extractMetadata(createParser(path))
-            if meta and meta.has("duration"):
-                dur = meta.get("duration").seconds
-        except Exception as e:
-            print(f"Metadata Error: {e}")
-            dur = 0
+        # Duration extraction ab Pyrogram ke message object se ho rahi hai, hachoir ki zaroorat nahi
+        # dur = 0 # Yeh line ab upar move ho gayi hai
+        # try:
+        #     meta = extractMetadata(createParser(path))
+        #     if meta and meta.has("duration"):
+        #         dur = meta.get("duration").seconds
+        # except Exception as e:
+        #     print(f"Metadata Error: {e}")
+        #     dur = 0
 
         umsg = await dmsg.edit("📤 ᴜᴘʟσᴧᴅ ꜱᴛᴧʀᴛɪηɢ...")
 
@@ -252,5 +257,4 @@ async def auto_rename(client: Client, msg: Message):
         if fid in RENAMES:
             del RENAMES[fid]
         return await msg.reply_text(f"❌ Main Error: {str(e)}")
-
 
