@@ -12,7 +12,7 @@ async def auto_rename_command(client, message):
     # Save the format template to the database
     await DvisPappa.set_format_template(user_id, format_template)
 
-    await message.reply_text("**Auto Rename Format Updated Successfully! ✅**")
+    await message.reply_text("**ʀєηᴧϻє ꜰσʀϻᴧᴛ ᴜᴘᴅᴧᴛєᴅ ꜱᴜᴄᴄєꜱꜱꜰᴜʟʟʏ! ✅**")
 
 @Client.on_message(filters.private & filters.command("setmedia"))
 async def set_media_command(client, message):
@@ -22,6 +22,6 @@ async def set_media_command(client, message):
     # Save the preferred media type to the database
     await DvisPappa.set_media_preference(user_id, media_type)
 
-    await message.reply_text(f"**Media Preference Set To :** {media_type} ✅")
+    await message.reply_text(f"**ϻєᴅɪᴧ ᴘʀєꜰєʀєηᴄє ꜱєᴛ ᴛσ :** {media_type} ✅")
 
 
