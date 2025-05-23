@@ -160,7 +160,8 @@ async def auto_rename(client: Client, msg: Message):
 
         umsg = await dmsg.edit("📤 Upload starting...")
 
-        default_caption = ({new_name})
+        default_caption = (f"{new_name}"
+        )
         
         caption = default_caption
 
