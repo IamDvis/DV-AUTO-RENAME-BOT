@@ -45,13 +45,15 @@ def extract_season(fname: str) -> str:
 
 def extract_quality(fname: str) -> str:
     qpats = [
-        (r'\b(?:.*?(\d{3,4}[^\dp]*p).*?|.*?(\d{3,4}p))\b', lambda m: m.group(1) or m.group(2)),
+        # More specific patterns first
         (r'[([{<]?\s*4k\s*[)\]}>]?', lambda m: "4k"),
         (r'[([{<]?\s*2k\s*[)\]}>]?', lambda m: "2k"),
-        (r'[([{<]?\s*HdRip\s*[)\]}>]?|\bHdRip\b', lambda m: "HdRip"),
         (r'[([{<]?\s*4kX264\s*[)\]}>]?', lambda m: "4kX264"),
         (r'[([{<]?\s*4kx265\s*[)\]}>]?', lambda m: "4kx265"),
-        (r'[([{<]?\s*WEB-DL\s*[)\]}>]?|\bWEB-DL\b', lambda m: "WEB-DL") # WEB-DL quality ke liye naya pattern
+        (r'[([{<]?\s*WEB[.\- ]?DL\s*[)\]}>]?|\bWEB[.\- ]?DL\b', lambda m: "WEB-DL"), # Refined WEB-DL pattern
+        (r'[([{<]?\s*HdRip\s*[)\]}>]?|\bHdRip\b', lambda m: "HdRip"),
+        # Generic resolution patterns last
+        (r'\b(?:.*?(\d{3,4}[^\dp]*p).*?|.*?(\d{3,4}p))\b', lambda m: m.group(1) or m.group(2)),
     ]
     for pat, func in qpats:
         m = re.search(pat, fname, re.IGNORECASE)
