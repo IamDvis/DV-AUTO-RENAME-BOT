@@ -39,7 +39,7 @@
         },
         "DB_URL": {
             "description": "Your Mongo DB URL Obtained From mongodb.com",
-            "value": "mongodb+srv://hnyx:wywyw2@cluster0.9dxlslv.mongodb.net/?retryWrites=true&w=majority"
+            "value": "mongodb+srv://Hello:Hello@cluster0.pi9ks.mongodb.net/?retryWrites=true&w=majority"
         },
         "DB_NAME": {
             "description": "Your Mongo DB Database Name",
@@ -53,7 +53,7 @@
         },
         "UPSTREAM_REPO": {
             "description": "If you dont know this, Leave as it is",
-            "value": "https://github.com/IamDvis/DV-AUTO-RENAME-BOT",
+            "value": "https://github.com/IamElite/ATRM",
             "required": true
         },
         "UPSTREAM_BRANCH": {
