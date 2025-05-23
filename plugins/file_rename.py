@@ -50,7 +50,8 @@ def extract_quality(fname: str) -> str:
         (r'[([{<]?\s*2k\s*[)\]}>]?', lambda m: "2k"),
         (r'[([{<]?\s*HdRip\s*[)\]}>]?|\bHdRip\b', lambda m: "HdRip"),
         (r'[([{<]?\s*4kX264\s*[)\]}>]?', lambda m: "4kX264"),
-        (r'[([{<]?\s*4kx265\s*[)\]}>]?', lambda m: "4kx265")
+        (r'[([{<]?\s*4kx265\s*[)\]}>]?', lambda m: "4kx265"),
+        (r'[([{<]?\s*WEB-DL\s*[)\]}>]?|\bWEB-DL\b', lambda m: "WEB-DL") # WEB-DL quality ke liye naya pattern
     ]
     for pat, func in qpats:
         m = re.search(pat, fname, re.IGNORECASE)
@@ -92,7 +93,6 @@ async def auto_rename(client: Client, msg: Message):
     if not fmt:
         return await msg.reply_text("⚠️ ᴘєʜʟє /autorename ᴄσϻϻᴧηᴅ ꜱє ꜰσʀϻᴧᴛ ꜱєᴛ ᴋᴧʀσ.")
 
-    # duration ko pehle hi initialize kar do
     dur = 0
     try:
         if msg.document:
@@ -100,11 +100,11 @@ async def auto_rename(client: Client, msg: Message):
         elif msg.video:
             fid, fname, fsize = msg.video.file_id, msg.video.file_name or f"video_{msg.video.file_unique_id}", msg.video.file_size
             fname = f"{os.path.splitext(fname)[0]}.mp4" if not os.path.splitext(fname)[1] else fname
-            dur = msg.video.duration if msg.video.duration else 0 # Video duration yahan se milegi
+            dur = msg.video.duration if msg.video.duration else 0
         elif msg.audio:
             fid, fname, fsize = msg.audio.file_id, msg.audio.file_name or f"audio_{msg.audio.file_unique_id}", msg.audio.file_size
             fname = f"{os.path.splitext(fname)[0]}.mp3" if not os.path.splitext(fname)[1] else fname
-            dur = msg.audio.duration if msg.audio.duration else 0 # Audio duration yahan se milegi
+            dur = msg.audio.duration if msg.audio.duration else 0
         else:
             return await msg.reply_text("❌ ᴜηꜱᴜᴘᴘσʀᴛєᴅ ꜰɪʟє ᴛʏᴘє")
     except Exception as e:
@@ -125,8 +125,10 @@ async def auto_rename(client: Client, msg: Message):
             for ph in ["episode", "Episode", "EPISODE", "{episode}"]:
                 fmt = fmt.replace(ph, ep, 1)
         
-        # Extract season number
         season_num = extract_season(fname or "")
+        # Agar season_num '0' hai toh use '1' kar do
+        if season_num == '0':
+            season_num = '1'
         if season_num:
             for ph in ["season", "Season", "SEASON", "{season}"]:
                 fmt = fmt.replace(ph, season_num, 1)
@@ -152,16 +154,6 @@ async def auto_rename(client: Client, msg: Message):
         except Exception as e:
             del RENAMES[fid]
             return await dmsg.edit(f"❌ Download Error: {str(e)}")
-
-        # Duration extraction ab Pyrogram ke message object se ho rahi hai, hachoir ki zaroorat nahi
-        # dur = 0 # Yeh line ab upar move ho gayi hai
-        # try:
-        #     meta = extractMetadata(createParser(path))
-        #     if meta and meta.has("duration"):
-        #         dur = meta.get("duration").seconds
-        # except Exception as e:
-        #     print(f"Metadata Error: {e}")
-        #     dur = 0
 
         umsg = await dmsg.edit("📤 ᴜᴘʟσᴧᴅ ꜱᴛᴧʀᴛɪηɢ...")
 
