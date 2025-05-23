@@ -9,9 +9,10 @@ from helper.database import DvisPappa
 from config import Config
 import os, time, re
 
+
 RENAMES = {}
 
-# --- Extraction Functions ---
+
 def extract_episode(fname: str) -> str:
     pats = [
         r'S(\d+)(?:E|EP)(\d+)',
@@ -25,6 +26,7 @@ def extract_episode(fname: str) -> str:
         if m:
             return m.group(2) if i in [0, 1, 4] else m.group(1)
     return None
+
 
 def extract_quality(fname: str) -> str:
     qpats = [
@@ -41,7 +43,7 @@ def extract_quality(fname: str) -> str:
             return func(m)
     return "Unknown"
 
-# --- Thumbnail Function ---
+
 async def get_thumb(client: Client, msg: Message, mtype: str) -> str:
     try:
         t = await DvisPappa.get_thumbnail(msg.chat.id)
@@ -58,23 +60,23 @@ async def get_thumb(client: Client, msg: Message, mtype: str) -> str:
         print(f"Thumbnail Error: {e}")
     return None
 
-# --- Main Handler ---
+
 @Client.on_message(filters.private & (filters.document | filters.video | filters.audio))
 async def auto_rename(client: Client, msg: Message):
-    # Check if user exists/is valid
     if not msg.from_user:
         return
-    
+
     uid = msg.from_user.id
+
     try:
         fmt = await DvisPappa.get_format_template(uid)
         mtype = (await DvisPappa.get_media_preference(uid)) or "document"
     except Exception as e:
         return await msg.reply_text(f"⚠️ Database Error: {str(e)}")
-    
+
     if not fmt:
         return await msg.reply_text("⚠️ Pehle /autorename command se format set karo.")
-    
+
     try:
         if msg.document:
             fid, fname, fsize = msg.document.file_id, msg.document.file_name, msg.document.file_size
@@ -88,43 +90,44 @@ async def auto_rename(client: Client, msg: Message):
             return await msg.reply_text("❌ Unsupported File Type")
     except Exception as e:
         return await msg.reply_text(f"❌ File Info Error: {str(e)}")
-    
-    # Force video format if file extension indicates video
+
     ext = os.path.splitext(fname)[1].lower() if fname else ".mp4"
     video_exts = [".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"]
     if ext in video_exts:
         mtype = "video"
-    
+
     if fid in RENAMES and (datetime.now() - RENAMES[fid]).seconds < 10:
         return
     RENAMES[fid] = datetime.now()
-    
+
     try:
         ep = extract_episode(fname or "")
         if ep:
             for ph in ["episode", "Episode", "EPISODE", "{episode}"]:
                 fmt = fmt.replace(ph, ep, 1)
+        
         q = extract_quality(fname or "")
         for ph in ["quality", "Quality", "QUALITY", "{quality}"]:
             fmt = fmt.replace(ph, q)
+        
         if "{old_name}" in fmt:
             fmt = fmt.replace("{old_name}", os.path.splitext(fname)[0] if fname else "file")
         
         new_name = f"{fmt}{ext}"
         path = f"downloads/{new_name}"
-        
+
         dmsg = await msg.reply_text("🚀 Download starting...")
         try:
             await client.download_media(
-                message=msg, 
-                file_name=path, 
-                progress=progress_for_pyrogram, 
+                message=msg,
+                file_name=path,
+                progress=progress_for_pyrogram,
                 progress_args=("🚀 Download Started...", dmsg, time.time())
             )
         except Exception as e:
             del RENAMES[fid]
             return await dmsg.edit(f"❌ Download Error: {str(e)}")
-        
+
         dur = 0
         try:
             meta = extractMetadata(createParser(path))
@@ -133,47 +136,64 @@ async def auto_rename(client: Client, msg: Message):
         except Exception as e:
             print(f"Metadata Error: {e}")
             dur = 0
-        
+
         umsg = await dmsg.edit("📤 Upload starting...")
+
+        default_caption = ({new_name}
+        )
+        
+        caption = default_caption
+
         try:
             cap = await DvisPappa.get_caption(msg.chat.id)
-            caption = (cap.format(filename=new_name, filesize=humanbytes(fsize), duration=convert(dur), quality=q)
-                      # if cap else f"📕Name ➠ : {new_name}\n\n🔗 Size ➠ : {humanbytes(fsize)}\n\n⏰ Duration ➠ : {convert(dur)}\n\n🎥 Quality ➠ : {q}")
-                       if cap else f"{new_name}")
+            if cap:
+                try:
+                    caption = cap.format(
+                        filename=new_name,
+                        filesize=humanbytes(fsize),
+                        duration=convert(dur),
+                        quality=q
+                    )
+                except KeyError as ke:
+                    print(f"Warning: Custom caption formatting failed due to missing key: {ke}. Using default caption.")
+                    caption = default_caption
+                except Exception as e:
+                    print(f"Error formatting custom caption: {e}. Using default caption.")
+                    caption = default_caption
         except Exception as e:
-            caption = f"📕Name ➠ : {new_name}\n\n🔗 Size ➠ : {humanbytes(fsize)}\n\n⏰ Duration ➠ : {convert(dur)}\n\n🎥 Quality ➠ : {q}"
-            caption = f"{new_name}"
-        
+            print(f"Error fetching custom caption from database: {e}. Using default caption.")
+            caption = default_caption
+
         thumb = await get_thumb(client, msg, mtype)
-        
+
         try:
             if mtype == "document":
                 await client.send_document(
-                    msg.chat.id, 
-                    document=path, 
-                    thumb=thumb, 
-                    caption=caption, 
-                    progress=progress_for_pyrogram, 
+                    msg.chat.id,
+                    document=path,
+                    thumb=thumb,
+                    caption=caption,
+                    progress=progress_for_pyrogram,
                     progress_args=("📤 Upload Started...", umsg, time.time())
                 )
             elif mtype == "video":
                 await client.send_video(
-                    msg.chat.id, 
-                    video=path, 
-                    caption=caption, 
-                    thumb=thumb, 
+                    msg.chat.id,
+                    video=path,
+                    caption=caption,
+                    thumb=thumb,
                     duration=dur,
-                    progress=progress_for_pyrogram, 
+                    progress=progress_for_pyrogram,
                     progress_args=("📤 Upload Started...", umsg, time.time())
                 )
             elif mtype == "audio":
                 await client.send_audio(
-                    msg.chat.id, 
-                    audio=path, 
-                    caption=caption, 
-                    thumb=thumb, 
+                    msg.chat.id,
+                    audio=path,
+                    caption=caption,
+                    thumb=thumb,
                     duration=dur,
-                    progress=progress_for_pyrogram, 
+                    progress=progress_for_pyrogram,
                     progress_args=("📤 Upload Started...", umsg, time.time())
                 )
         except Exception as e:
@@ -183,15 +203,16 @@ async def auto_rename(client: Client, msg: Message):
                 os.remove(thumb)
             del RENAMES[fid]
             return await umsg.edit(f"❌ Upload Error: {str(e)}")
-        
+
         await dmsg.delete()
         if os.path.exists(path):
             os.remove(path)
         if thumb and os.path.exists(thumb):
             os.remove(thumb)
         del RENAMES[fid]
-        
+
     except Exception as e:
         if fid in RENAMES:
             del RENAMES[fid]
         return await msg.reply_text(f"❌ Main Error: {str(e)}")
+
