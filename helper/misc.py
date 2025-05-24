@@ -11,15 +11,15 @@ SUDOERS = set()
 LOGGER = logging.getLogger(__name__)
 
 UNAUTHORIZED_MESSAGE_TEXT = (
-    "🚫 ᴀᴘ ɪꜱ ʙσᴛ ᴋσ ᴜꜱє ᴋᴧʀηє ᴋє ʟɪʏє ᴧᴜᴛʜσʀɪᴢєᴅ ηᴧʜɪη ʜᴧɪη.\n"
-    "ᴋʀɪᴘᴧʏᴧ ᴧᴅϻɪη ꜱє ꜱᴧϻᴘᴧʀᴋ ᴋᴧʀєɪη."
+    "🚫 ᴀᴘ ɪꜱ ʙσᴛ ᴋσ ᴜꜱє ᴋᴧʀηє ᴋє ʟᴧʏᴧᴋ ηᴧʜɪη ʜᴧɪη. ǫ ηʜɪ ʜ ᴊᴧηηє ᴋє ʟɪʏє.\n"
+    "ᴋʀɪᴘᴧʏᴧ σᴡηєʀ ꜱє ꜱᴧϻᴘᴧʀᴋ ᴋᴧʀєɪη."
 )
 
 UNAUTHORIZED_MESSAGE_MARKUP = InlineKeyboardMarkup(
     [
         [
             InlineKeyboardButton(
-                "ᴧᴅϻɪη",
+                "✿ σᴡηєʀ ✿",
                 url="https://t.me/DvisDmBot?start"
             )
         ]
