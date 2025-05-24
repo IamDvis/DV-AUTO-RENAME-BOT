@@ -8,7 +8,7 @@ class Config(object):
     BOT_TOKEN = os.environ.get("BOT_TOKEN", "") 
 
     # database config
-    DB_NAME = os.environ.get("DB_NAME","DvisPappa")     
+    DB_NAME = os.environ.get("DB_NAME","DvisPappa")    
     DB_URL  = os.environ.get("DB_URL","")
  
     # other configs
@@ -18,8 +18,10 @@ class Config(object):
     FORCE_SUB   = os.environ.get("FORCE_SUB", "") 
     LOG_CHANNEL = int(os.environ.get("LOG_CHANNEL", ""))
     
-    # wes response configuration     
+    # wes response configuration    
     WEBHOOK = bool(os.environ.get("WEBHOOK", "True"))
+
+
 
 
 class Txt(object):
