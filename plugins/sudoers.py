@@ -1,9 +1,9 @@
 from pyrogram import filters, Client
 from pyrogram.enums import MessageEntityType
-from pyrogram.types import Message, User
+from pyrogram.types import Message, User, InlineKeyboardMarkup, InlineKeyboardButton
 
 from helper.misc import SUDOERS
-from helper.database import DvisPappa
+from database import DvisPappa
 from config import Config
 
 def language(func):
@@ -95,13 +95,27 @@ async def userdel(client: Client, message: Message, _):
         await message.reply_text(_["sudo_8"])
 
 
-@Client.on_message(filters.command(["sudolist", "listsudo", "sudoers"]) & ~filters.user(Config.ADMIN))
+@Client.on_message(filters.command(["sudolist", "listsudo", "sudoers"]) & ~filters.user(Config.BANNED_USERS))
 @language
 async def sudoers_list(client: Client, message: Message, _):
     text = _["sudo_5"]
     
-    owner_user = await client.get_users(Config.ADMIN)
-    owner_mention = owner_user.first_name if not owner_user.mention else owner_user.mention
+    owner_user_raw = await client.get_users(Config.ADMIN)
+    
+    owner_user = None
+    if isinstance(owner_user_raw, list):
+        if owner_user_raw:
+            owner_user = owner_user_raw[0]
+    else:
+        owner_user = owner_user_raw
+
+    owner_mention = "Owner"
+
+    if owner_user:
+        owner_mention = owner_user.first_name if not owner_user.mention else owner_user.mention
+    else:
+        owner_mention = f"Owner (ID: {Config.ADMIN}) - Not Found"
+
     text += f"❖ {owner_mention}\n"
     
     count = 0
@@ -126,3 +140,4 @@ async def sudoers_list(client: Client, message: Message, _):
         await message.reply_text(_["sudo_7"], reply_markup=close_markup(_))
     else:
         await message.reply_text(text, reply_markup=close_markup(_))
+
