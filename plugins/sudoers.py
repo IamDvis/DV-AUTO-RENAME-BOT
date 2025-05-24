@@ -3,7 +3,7 @@ from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message, User
 
 from helper.misc import SUDOERS
-from database import DvisPappa
+from helper.database import DvisPappa
 from config import Config
 
 def language(func):
