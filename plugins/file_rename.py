@@ -43,7 +43,7 @@ def extract_season(fname: str) -> str:
     return None
 
 
-def extract_quality(fname: str) -> str:
+def extract_quality(text: str) -> str: # fname se text kar diya taaki caption se bhi use ho sake
     qpats = [
         # More specific patterns first
         (r'[([{<]?\s*4k\s*[)\]}>]?', lambda m: "4k"),
@@ -56,7 +56,7 @@ def extract_quality(fname: str) -> str:
         (r'\b(?:.*?(\d{3,4}[^\dp]*p).*?|.*?(\d{3,4}p))\b', lambda m: m.group(1) or m.group(2)),
     ]
     for pat, func in qpats:
-        m = re.search(pat, fname, re.IGNORECASE)
+        m = re.search(pat, text, re.IGNORECASE) # fname se text kar diya
         if m:
             return func(m)
     return "Unknown"
@@ -86,9 +86,12 @@ async def auto_rename(client: Client, msg: Message):
 
     uid = msg.from_user.id
 
+    # Custom caption ko yahan fetch kar lete hain taaki quality extraction mein use ho sake
+    custom_caption_from_db = None
     try:
         fmt = await DvisPappa.get_format_template(uid)
         mtype = (await DvisPappa.get_media_preference(uid)) or "document"
+        custom_caption_from_db = await DvisPappa.get_caption(msg.chat.id) # Caption pehle hi fetch kar liya
     except Exception as e:
         return await msg.reply_text(f"⚠️ ᴅᴧᴛᴧʙᴧꜱє єʀʀσʀ: {str(e)}")
 
@@ -135,7 +138,14 @@ async def auto_rename(client: Client, msg: Message):
             for ph in ["season", "Season", "SEASON", "{season}"]:
                 fmt = fmt.replace(ph, season_num, 1)
 
-        q = extract_quality(fname or "")
+        q = extract_quality(fname or "") # Pehle filename se quality extract karo
+        
+        # Agar quality "Unknown" hai aur custom caption available hai, toh caption se extract karne ki koshish karo
+        if q == "Unknown" and custom_caption_from_db:
+            caption_quality = extract_quality(custom_caption_from_db)
+            if caption_quality != "Unknown":
+                q = caption_quality # Agar caption se quality mili toh update karo
+
         for ph in ["quality", "Quality", "QUALITY", "{quality}"]:
             fmt = fmt.replace(ph, q)
         
@@ -173,10 +183,10 @@ async def auto_rename(client: Client, msg: Message):
         caption = default_caption
 
         try:
-            cap = await DvisPappa.get_caption(msg.chat.id)
-            if cap:
+            # Ab custom_caption_from_db variable use hoga
+            if custom_caption_from_db:
                 try:
-                    caption = cap.format(
+                    caption = custom_caption_from_db.format(
                         filename=new_name,
                         filesize=humanbytes(fsize),
                         duration=convert(dur),
