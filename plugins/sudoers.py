@@ -3,7 +3,7 @@ from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message, User, InlineKeyboardMarkup, InlineKeyboardButton
 
 from helper.misc import SUDOERS
-from database import DvisPappa
+from helper.database import DvisPappa
 from config import Config
 
 def language(func):
@@ -14,8 +14,8 @@ def language(func):
             "sudo_2": "{} added to sudo users.",
             "sudo_3": "{} is not a sudo user.",
             "sudo_4": "{} removed from sudo users.",
-            "sudo_5": "Sudo Users List:\n\nBot Admin:\n", # "Owner" ko "Bot Admin" kiya
-            "sudo_6": "\n\nSudo Users:\n", # "Other Sudo Users" ko "Sudo Users" kiya
+            "sudo_5": "Sudo Users List:\n\nowner:\n", # "Owner" ko "Bot Admin" kiya
+            "sudo_6": "\n\nsudos:\n", # "Other Sudo Users" ko "Sudo Users" kiya
             "sudo_7": "No other sudo users found.",
             "sudo_8": "Failed to update sudo user status in database."
         }
