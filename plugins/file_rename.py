@@ -1,12 +1,13 @@
 from pyrogram import Client, filters
-from pyrogram.types import Message
+from pyrogram.enums import MessageEntityType
+from pyrogram.types import Message, User
 from PIL import Image
 from datetime import datetime
 from helper.utils import progress_for_pyrogram, humanbytes, convert
 from helper.database import DvisPappa
 from config import Config
 import os, time, re
-from helper.misc import SUDOERS # SUDOERS set ko import kiya
+from helper.misc import SUDOERS
 
 RENAMES = {}
 
@@ -74,7 +75,7 @@ async def get_thumb(client: Client, msg: Message, mtype: str) -> str:
     return None
 
 
-@Client.on_message(filters.private & (filters.document | filters.video | filters.audio) & filters.user(SUDOERS))
+@Client.on_message(filters.private & (filters.document | filters.video | filters.audio) & filters.user(list(SUDOERS)))
 async def auto_rename(client: Client, msg: Message):
     if not msg.from_user:
         return
