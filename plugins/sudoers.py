@@ -14,8 +14,8 @@ def language(func):
             "sudo_2": "{} added to sudo users.",
             "sudo_3": "{} is not a sudo user.",
             "sudo_4": "{} removed from sudo users.",
-            "sudo_5": "Sudo Users List:\n\nowner:\n", # "Owner" ko "Bot Admin" kiya
-            "sudo_6": "\n\nsudos:\n", # "Other Sudo Users" ko "Sudo Users" kiya
+            "sudo_5": "Sudo Users List:\n\nowener:\n",
+            "sudo_6": "\n\nsudos:\n",
             "sudo_7": "No other sudo users found.",
             "sudo_8": "Failed to update sudo user status in database."
         }
@@ -95,49 +95,40 @@ async def userdel(client: Client, message: Message, _):
         await message.reply_text(_["sudo_8"])
 
 
-@Client.on_message(filters.command(["sudolist", "listsudo", "sudoers"]) & ~filters.user(Config.ADMIN))
+@Client.on_message(filters.command(["sudolist", "listsudo", "sudoers"]) & filters.user(Config.ADMIN))
 @language
 async def sudoers_list(client: Client, message: Message, _):
-    text = _["sudo_5"] # Ab "Bot Admin" se shuru hoga
+    text = _["sudo_5"]
     
-    owner_user_raw = await client.get_users(Config.ADMIN)
-    
-    owner_user = None
-    if isinstance(owner_user_raw, list):
-        if owner_user_raw:
-            owner_user = owner_user_raw[0]
+    primary_owner_id = Config.ADMIN[0] if Config.ADMIN else None
+    primary_owner_mention = "Owner"
+
+    if primary_owner_id:
+        try:
+            owner_user = await client.get_users(primary_owner_id)
+            primary_owner_mention = owner_user.first_name if not owner_user.mention else owner_user.mention
+        except Exception:
+            primary_owner_mention = f"Owner (ID: {primary_owner_id}) - Not Found"
     else:
-        owner_user = owner_user_raw
+        primary_owner_mention = "No Owner Configured"
 
-    owner_mention = "Bot Admin" # Default fallback
-
-    if owner_user:
-        owner_mention = owner_user.first_name if not owner_user.mention else owner_user.mention
-    else:
-        owner_mention = f"Bot Admin (ID: {Config.ADMIN}) - Not Found"
-
-    text += f"❖ {owner_mention}\n"
+    text += f"❖ {primary_owner_mention}\n"
     
-    count = 0
-    smex = 0
-    
+    other_sudo_users = []
     for user_id in SUDOERS:
-        if user_id != Config.ADMIN:
+        if user_id != primary_owner_id:
             try:
                 user = await client.get_users(user_id)
-                user_mention = user.first_name if not user.mention else user.mention
-                
-                if smex == 0:
-                    smex += 1
-                    text += _["sudo_6"] # Ab "Sudo Users" se shuru hoga
-                
-                count += 1
-                text += f"❖ {count} ➥ {user_mention}\n"
+                other_sudo_users.append(user.first_name if not user.mention else user.mention)
             except Exception:
                 continue
-    
-    if count == 0 and smex == 0:
-        await message.reply_text(_["sudo_7"], reply_markup=close_markup(_))
+
+    if other_sudo_users:
+        text += _["sudo_6"]
+        for i, mention in enumerate(other_sudo_users):
+            text += f"❖ {i+1} ➥ {mention}\n"
     else:
-        await message.reply_text(text, reply_markup=close_markup(_))
+        text += _["sudo_7"]
+    
+    await message.reply_text(text, reply_markup=close_markup(_))
 
