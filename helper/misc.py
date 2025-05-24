@@ -1,6 +1,6 @@
 import logging
 from config import Config
-from database import DvisPappa
+from .database import DvisPappa
 
 OWNER_ID = Config.ADMIN
 
