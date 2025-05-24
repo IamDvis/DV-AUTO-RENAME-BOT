@@ -95,7 +95,7 @@ async def userdel(client: Client, message: Message, _):
         await message.reply_text(_["sudo_8"])
 
 
-@Client.on_message(filters.command(["sudolist", "listsudo", "sudoers"]) & ~filters.user(Config.BANNED_USERS))
+@Client.on_message(filters.command(["sudolist", "listsudo", "sudoers"]) & ~filters.user(Config.ADMIN))
 @language
 async def sudoers_list(client: Client, message: Message, _):
     text = _["sudo_5"] # Ab "Bot Admin" se shuru hoga
