@@ -59,10 +59,10 @@ class Bot(Client):
                 except Exception as e:
                     LOGGER.error(f"Error starting webhook server: {e}")
 
-            if hasattr(Config, 'LOG_CHANNEL') and Config.LOG_CHANNEL:
-                for admin_id in Config.LOG_CHANNEL:
+            if hasattr(Config, 'ADMIN') and Config.ADMIN:
+                for admin_id in Config.ADMIN:
                     try:
-                        await self.send_message(admin_id, f"**{me.first_name} Is Started.....✨️**")
+                        await self.send_message(Config.LOG_CHANNEL, f"**{me.first_name} Is Started.....✨️**")
                     except Exception as e:
                         LOGGER.warning(f"Could not send start message to admin {admin_id}: {e}")
 
