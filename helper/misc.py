@@ -1,8 +1,9 @@
 import logging
 from config import Config
-from .database import DvisPappa
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from functools import wraps
+
+from .database import DvisPappa
 
 SUDOERS = set()
 
@@ -33,36 +34,43 @@ async def sudo():
         return
 
     try:
-        if not isinstance(Config.ADMIN, int):
-            LOGGER.error(f"Config.ADMIN is not an integer: {type(Config.ADMIN)}. Please check config.py.")
-            try:
-                converted_admin_id = int(Config.ADMIN)
-                SUDOERS.add(converted_admin_id)
-                LOGGER.warning(f"Converted Config.ADMIN to integer: {converted_admin_id}")
-            except ValueError:
-                LOGGER.error("Config.ADMIN cannot be converted to an integer. Sudoers loading will be incomplete.")
-                return
-        else:
-            SUDOERS.add(Config.ADMIN)
-        LOGGER.info(f"Owner ID {Config.ADMIN} added to SUDOERS set temporarily.")
+        SUDOERS.clear()
+
+        for admin_id in Config.ADMIN:
+            if isinstance(admin_id, int):
+                SUDOERS.add(admin_id)
+            else:
+                LOGGER.warning(f"Skipping non-integer ADMIN ID from Config: {admin_id} (Type: {type(admin_id)})")
+
+        sudoers_list_from_db = await DvisPappa.get_sudoers()
+        LOGGER.info(f"Fetched {len(sudoers_list_from_db)} sudoers from database.")
+
+        updated_sudoers_list_for_db = list(sudoers_list_from_db)
+        
+        changes_made_to_db_list = False
+        for admin_id in Config.ADMIN:
+            if isinstance(admin_id, int) and admin_id not in updated_sudoers_list_for_db:
+                LOGGER.info(f"Configured ADMIN ID {admin_id} not in database sudoers list. Adding now.")
+                updated_sudoers_list_for_db.append(admin_id)
+                changes_made_to_db_list = True
+        
+        if changes_made_to_db_list:
+            await DvisPappa.sudoers_col.update_one(
+                {"sudo": "sudo"},
+                {"$set": {"sudoers": updated_sudoers_list_for_db}},
+                upsert=True,
+            )
+            LOGGER.info("Database sudoers list updated with configured ADMIN IDs.")
+            sudoers_list_from_db = await DvisPappa.get_sudoers()
 
 
-        sudoers_list = await DvisPappa.get_sudoers()
-        LOGGER.info(f"Fetched {len(sudoers_list)} sudoers from database.")
-
-        if Config.ADMIN not in sudoers_list:
-            LOGGER.info(f"Owner ID {Config.ADMIN} not in database sudoers list. Adding now.")
-            await DvisPappa.add_sudo(Config.ADMIN)
-            sudoers_list = await DvisPappa.get_sudoers()
-            LOGGER.info("Owner ID added to database sudoers.")
-
-        if sudoers_list:
-            for user_id in sudoers_list:
+        if sudoers_list_from_db:
+            for user_id in sudoers_list_from_db:
                 if isinstance(user_id, int):
                     SUDOERS.add(user_id)
                 else:
                     LOGGER.warning(f"Skipping non-integer sudoer ID from database: {user_id} (Type: {type(user_id)})")
-            LOGGER.info(f"Final SUDOERS set populated with {len(SUDOERS)} users.")
+            LOGGER.info(f"Final SUDOERS set populated with {len(SUDOERS)} users after database sync.")
 
         LOGGER.info(f"✦ Sudoers Loaded successfully. Total: {len(SUDOERS)} users. ❤️")
 
