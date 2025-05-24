@@ -1,13 +1,13 @@
 from pyrogram import Client, filters
 from pyrogram.enums import MessageEntityType
-from pyrogram.types import Message, User, InlineKeyboardMarkup, InlineKeyboardButton # InlineKeyboard imports add kiye
+from pyrogram.types import Message, User
 from PIL import Image
 from datetime import datetime
 from helper.utils import progress_for_pyrogram, humanbytes, convert
 from helper.database import DvisPappa
 from config import Config
 import os, time, re
-from helper.misc import SUDOERS
+from helper.misc import SUDOERS, chksudo
 
 RENAMES = {}
 
@@ -75,7 +75,8 @@ async def get_thumb(client: Client, msg: Message, mtype: str) -> str:
     return None
 
 
-@Client.on_message(filters.private & (filters.document | filters.video | filters.audio) & filters.user(list(SUDOERS)))
+@Client.on_message(filters.private & (filters.document | filters.video | filters.audio))
+@chksudo
 async def auto_rename(client: Client, msg: Message):
     if not msg.from_user:
         return
@@ -253,22 +254,3 @@ async def auto_rename(client: Client, msg: Message):
         if fid in RENAMES:
             del RENAMES[fid]
         return await msg.reply_text(f"❌ Main Error: {str(e)}")
-
-
-@Client.on_message(filters.private & (filters.document | filters.video | filters.audio) & ~filters.user(list(SUDOERS)))
-async def non_sudo_user_message(client: Client, msg: Message):
-    keyboard = InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton(
-                    "ᴧᴅϻɪη",
-                    url="https://t.me/DvisDmBot?start"
-                )
-            ]
-        ]
-    )
-    await msg.reply_text(
-        "🚫 ᴀᴘ ɪꜱ ʙσᴛ ᴋσ ᴜꜱє ᴋᴧʀηє ᴋє ʟɪʏє ᴧᴜᴛʜσʀɪᴢєᴅ ηᴧʜɪη ʜᴧɪη.\n"
-        "ᴋʀɪᴘᴧʏᴧ ᴧᴅϻɪη ꜱє ꜱᴧϻᴘᴧʀᴋ ᴋᴧʀєɪη.",
-        reply_markup=keyboard
-    )
