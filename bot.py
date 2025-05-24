@@ -39,34 +39,33 @@ class Bot(Client):
         self.username = me.username
         self.uptime = datetime.now(timezone("Asia/Kolkata"))
         
-        self.LOGGER.info(f"{me.first_name} Is Started.....✨️")
+        LOGGER.info(f"{me.first_name} Is Started.....✨️")
 
-        self.LOGGER.info("Attempting to initialize database and load sudoers...")
         try:
             if DvisPappa._client is None:
-                self.LOGGER.error("DvisPappa database client could not be initialized. Check DB_URL and DB_NAME in config.")
+                LOGGER.error("Database client could not be initialized. Check DB_URL and DB_NAME in config.")
             else:
-                self.LOGGER.info("Database connection established via DvisPappa instance.")
+                LOGGER.info("Database connected. Loading sudoers...")
                 await sudo()
-                self.LOGGER.info("Sudoers loading process initiated and completed.")
+                LOGGER.info("Sudoers loaded.")
         except Exception as e:
-            self.LOGGER.error(f"Error during database or sudoers initialization: {e}")
+            LOGGER.error(f"Error during database or sudoers initialization: {e}")
 
         if hasattr(Config, 'WEBHOOK') and Config.WEBHOOK:
             try:
                 app_runner = web.AppRunner(await web_server())
                 await app_runner.setup()
                 await web.TCPSite(app_runner, "0.0.0.0", 8080).start()
-                self.LOGGER.info("Webhook server started.")
+                LOGGER.info("Webhook server started.")
             except Exception as e:
-                self.LOGGER.error(f"Error starting webhook server: {e}")
+                LOGGER.error(f"Error starting webhook server: {e}")
 
         if hasattr(Config, 'ADMIN') and Config.ADMIN:
             for admin_id in Config.ADMIN:
                 try:
                     await self.send_message(admin_id, f"**{me.first_name} Is Started.....✨️**")
                 except Exception as e:
-                    self.LOGGER.warning(f"Could not send start message to admin {admin_id}: {e}")
+                    LOGGER.warning(f"Could not send start message to admin {admin_id}: {e}")
 
         if hasattr(Config, 'LOG_CHANNEL') and Config.LOG_CHANNEL:
             try:
@@ -78,13 +77,8 @@ class Bot(Client):
                     f"**{me.mention} Is Restarted !!**\n\n Date : `{date_str}`\n⏰ Time : `{time_str}`\n Timezone : `Asia/Kolkata`\n\n Version : `v{__version__} (Layer {layer})`"
                 )
             except Exception as e:
-                self.LOGGER.error(f"Please Make This Is Admin In Your Log Channel or check LOG_CHANNEL ID: {e}")
+                LOGGER.error(f"Please Make This Is Admin In Your Log Channel or check LOG_CHANNEL ID: {e}")
 
     async def stop(self):
         await super().stop()
-        self.LOGGER.info("Bot stopped!")
-
-if __name__ == "__main__":
-    import asyncio
-    Bot().run()
-
+        LOGGER.info("Bot stopped!")
