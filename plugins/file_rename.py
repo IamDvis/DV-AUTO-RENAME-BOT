@@ -2,16 +2,13 @@ from pyrogram import Client, filters
 from pyrogram.types import Message
 from PIL import Image
 from datetime import datetime
-# from hachoir.metadata import extractMetadata # Ab iski zaroorat nahi
-# from hachoir.parser import createParser     # Ab iski zaroorat nahi
 from helper.utils import progress_for_pyrogram, humanbytes, convert
 from helper.database import DvisPappa
 from config import Config
 import os, time, re
-
+from helper.misc import SUDOERS # SUDOERS set ko import kiya
 
 RENAMES = {}
-
 
 def extract_episode(fname: str) -> str:
     pats = [
@@ -43,20 +40,18 @@ def extract_season(fname: str) -> str:
     return None
 
 
-def extract_quality(text: str) -> str: # fname se text kar diya taaki caption se bhi use ho sake
+def extract_quality(text: str) -> str:
     qpats = [
-        # More specific patterns first
         (r'[([{<]?\s*4k\s*[)\]}>]?', lambda m: "4k"),
         (r'[([{<]?\s*2k\s*[)\]}>]?', lambda m: "2k"),
         (r'[([{<]?\s*4kX264\s*[)\]}>]?', lambda m: "4kX264"),
         (r'[([{<]?\s*4kx265\s*[)\]}>]?', lambda m: "4kx265"),
-        (r'\bWEB[.\- ]*DL\b', lambda m: "WEB-DL"), # Refined WEB-DL pattern for better detection
+        (r'\bWEB[.\- ]*DL\b', lambda m: "WEB-DL"),
         (r'[([{<]?\s*HdRip\s*[)\]}>]?|\bHdRip\b', lambda m: "HdRip"),
-        # Generic resolution patterns last
         (r'\b(?:.*?(\d{3,4}[^\dp]*p).*?|.*?(\d{3,4}p))\b', lambda m: m.group(1) or m.group(2)),
     ]
     for pat, func in qpats:
-        m = re.search(pat, text, re.IGNORECASE) # fname se text kar diya
+        m = re.search(pat, text, re.IGNORECASE)
         if m:
             return func(m)
     return "Unknown"
@@ -79,19 +74,18 @@ async def get_thumb(client: Client, msg: Message, mtype: str) -> str:
     return None
 
 
-@Client.on_message(filters.private & (filters.document | filters.video | filters.audio))
+@Client.on_message(filters.private & (filters.document | filters.video | filters.audio) & filters.user(SUDOERS))
 async def auto_rename(client: Client, msg: Message):
     if not msg.from_user:
         return
 
     uid = msg.from_user.id
 
-    # Custom caption ko yahan fetch kar lete hain taaki quality extraction mein use ho sake
     custom_caption_from_db = None
     try:
         fmt = await DvisPappa.get_format_template(uid)
         mtype = (await DvisPappa.get_media_preference(uid)) or "document"
-        custom_caption_from_db = await DvisPappa.get_caption(msg.chat.id) # Caption pehle hi fetch kar liya
+        custom_caption_from_db = await DvisPappa.get_caption(msg.chat.id)
     except Exception as e:
         return await msg.reply_text(f"⚠️ ᴅᴧᴛᴧʙᴧꜱє єʀʀσʀ: {str(e)}")
 
@@ -131,20 +125,18 @@ async def auto_rename(client: Client, msg: Message):
                 fmt = fmt.replace(ph, ep, 1)
         
         season_num = extract_season(fname or "")
-        # Agar season_num '0' hai toh use '1' kar do
         if season_num == '0':
             season_num = '1'
         if season_num:
             for ph in ["season", "Season", "SEASON", "{season}"]:
                 fmt = fmt.replace(ph, season_num, 1)
 
-        q = extract_quality(fname or "") # Pehle filename se quality extract karo
+        q = extract_quality(fname or "")
         
-        # Agar quality "Unknown" hai aur custom caption available hai, toh caption se extract karne ki koshish karo
         if q == "Unknown" and custom_caption_from_db:
             caption_quality = extract_quality(custom_caption_from_db)
             if caption_quality != "Unknown":
-                q = caption_quality # Agar caption se quality mili toh update karo
+                q = caption_quality
 
         for ph in ["quality", "Quality", "QUALITY", "{quality}"]:
             fmt = fmt.replace(ph, q)
@@ -183,7 +175,6 @@ async def auto_rename(client: Client, msg: Message):
         caption = default_caption
 
         try:
-            # Ab custom_caption_from_db variable use hoga
             if custom_caption_from_db:
                 try:
                     caption = custom_caption_from_db.format(
@@ -261,4 +252,3 @@ async def auto_rename(client: Client, msg: Message):
         if fid in RENAMES:
             del RENAMES[fid]
         return await msg.reply_text(f"❌ Main Error: {str(e)}")
-
