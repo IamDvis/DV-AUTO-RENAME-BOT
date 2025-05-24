@@ -28,7 +28,6 @@ UNAUTHORIZED_MESSAGE_MARKUP = InlineKeyboardMarkup(
 async def sudo():
     global SUDOERS
 
-    LOGGER.info("Attempting to load sudoers...")
     if DvisPappa._client is None:
         LOGGER.error("DvisPappa client is None. Database connection failed earlier. Cannot load sudoers.")
         return
@@ -43,34 +42,21 @@ async def sudo():
                 LOGGER.warning(f"Skipping non-integer ADMIN ID from Config: {admin_id} (Type: {type(admin_id)})")
 
         sudoers_list_from_db = await DvisPappa.get_sudoers()
-        LOGGER.info(f"Fetched {len(sudoers_list_from_db)} sudoers from database.")
 
-        updated_sudoers_list_for_db = list(sudoers_list_from_db)
+        combined_sudoers_for_db = set(SUDOERS)
+        for user_id in sudoers_list_from_db:
+            if isinstance(user_id, int):
+                combined_sudoers_for_db.add(user_id)
+            else:
+                LOGGER.warning(f"Skipping non-integer sudoer ID from database during combine: {user_id} (Type: {type(user_id)})")
         
-        changes_made_to_db_list = False
-        for admin_id in Config.ADMIN:
-            if isinstance(admin_id, int) and admin_id not in updated_sudoers_list_for_db:
-                LOGGER.info(f"Configured ADMIN ID {admin_id} not in database sudoers list. Adding now.")
-                updated_sudoers_list_for_db.append(admin_id)
-                changes_made_to_db_list = True
-        
-        if changes_made_to_db_list:
-            await DvisPappa.sudoers_col.update_one(
-                {"sudo": "sudo"},
-                {"$set": {"sudoers": updated_sudoers_list_for_db}},
-                upsert=True,
-            )
-            LOGGER.info("Database sudoers list updated with configured ADMIN IDs.")
-            sudoers_list_from_db = await DvisPappa.get_sudoers()
+        await DvisPappa.sudoers_col.update_one(
+            {"sudo": "sudo"},
+            {"$set": {"sudoers": list(combined_sudoers_for_db)}},
+            upsert=True,
+        )
 
-
-        if sudoers_list_from_db:
-            for user_id in sudoers_list_from_db:
-                if isinstance(user_id, int):
-                    SUDOERS.add(user_id)
-                else:
-                    LOGGER.warning(f"Skipping non-integer sudoer ID from database: {user_id} (Type: {type(user_id)})")
-            LOGGER.info(f"Final SUDOERS set populated with {len(SUDOERS)} users after database sync.")
+        SUDOERS.update(user_id for user_id in combined_sudoers_for_db if isinstance(user_id, int))
 
         LOGGER.info(f"✦ Sudoers Loaded successfully. Total: {len(SUDOERS)} users. ❤️")
 
@@ -89,7 +75,6 @@ def chksudo(func):
         user_id = message.from_user.id
         
         if not await is_user_sudo(user_id):
-            LOGGER.info(f"Non-sudo user {user_id} tried to use a sudo-only command.")
             await message.reply_text(
                 UNAUTHORIZED_MESSAGE_TEXT,
                 reply_markup=UNAUTHORIZED_MESSAGE_MARKUP
