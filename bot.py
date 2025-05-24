@@ -31,7 +31,6 @@ class Bot(Client):
             plugins={"root": "plugins"},
             sleep_threshold=15,
         )
-        self.LOGGER = logging.getLogger(f"{__name__}.Bot")
 
     async def start(self):
         await super().start()
