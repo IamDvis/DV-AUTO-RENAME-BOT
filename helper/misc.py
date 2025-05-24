@@ -4,8 +4,6 @@ from .database import DvisPappa
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from functools import wraps
 
-OWNER_ID = Config.ADMIN
-
 SUDOERS = set()
 
 LOGGER = logging.getLogger(__name__)
@@ -29,24 +27,44 @@ UNAUTHORIZED_MESSAGE_MARKUP = InlineKeyboardMarkup(
 async def sudo():
     global SUDOERS
 
+    LOGGER.info("Attempting to load sudoers...")
     if DvisPappa._client is None:
-        LOGGER.error("Database client is not initialized in DvisPappa. Cannot load sudoers.")
+        LOGGER.error("DvisPappa client is None. Database connection failed earlier. Cannot load sudoers.")
         return
 
     try:
-        SUDOERS.add(OWNER_ID)
+        if not isinstance(Config.ADMIN, int):
+            LOGGER.error(f"Config.ADMIN is not an integer: {type(Config.ADMIN)}. Please check config.py.")
+            try:
+                converted_admin_id = int(Config.ADMIN)
+                SUDOERS.add(converted_admin_id)
+                LOGGER.warning(f"Converted Config.ADMIN to integer: {converted_admin_id}")
+            except ValueError:
+                LOGGER.error("Config.ADMIN cannot be converted to an integer. Sudoers loading will be incomplete.")
+                return
+        else:
+            SUDOERS.add(Config.ADMIN)
+        LOGGER.info(f"Owner ID {Config.ADMIN} added to SUDOERS set temporarily.")
+
 
         sudoers_list = await DvisPappa.get_sudoers()
+        LOGGER.info(f"Fetched {len(sudoers_list)} sudoers from database.")
 
-        if OWNER_ID not in sudoers_list:
-            await DvisPappa.add_sudo(OWNER_ID)
+        if Config.ADMIN not in sudoers_list:
+            LOGGER.info(f"Owner ID {Config.ADMIN} not in database sudoers list. Adding now.")
+            await DvisPappa.add_sudo(Config.ADMIN)
             sudoers_list = await DvisPappa.get_sudoers()
+            LOGGER.info("Owner ID added to database sudoers.")
 
         if sudoers_list:
             for user_id in sudoers_list:
-                SUDOERS.add(user_id)
+                if isinstance(user_id, int):
+                    SUDOERS.add(user_id)
+                else:
+                    LOGGER.warning(f"Skipping non-integer sudoer ID from database: {user_id} (Type: {type(user_id)})")
+            LOGGER.info(f"Final SUDOERS set populated with {len(SUDOERS)} users.")
 
-        LOGGER.info(f"✦ Sudoers Loaded: {len(SUDOERS)} users. ❤️")
+        LOGGER.info(f"✦ Sudoers Loaded successfully. Total: {len(SUDOERS)} users. ❤️")
 
     except Exception as e:
         LOGGER.error(f"Error loading sudoers: {e}")
@@ -63,6 +81,7 @@ def chksudo(func):
         user_id = message.from_user.id
         
         if not await is_user_sudo(user_id):
+            LOGGER.info(f"Non-sudo user {user_id} tried to use a sudo-only command.")
             await message.reply_text(
                 UNAUTHORIZED_MESSAGE_TEXT,
                 reply_markup=UNAUTHORIZED_MESSAGE_MARKUP
