@@ -3,7 +3,7 @@ from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message, User, InlineKeyboardMarkup, InlineKeyboardButton
 
 from helper.misc import SUDOERS
-from helper.database import DvisPappa
+from database import DvisPappa
 from config import Config
 
 def language(func):
@@ -14,8 +14,8 @@ def language(func):
             "sudo_2": "{} added to sudo users.",
             "sudo_3": "{} is not a sudo user.",
             "sudo_4": "{} removed from sudo users.",
-            "sudo_5": "Sudo Users List:\n\nOwner:\n",
-            "sudo_6": "\n\nOther Sudo Users:\n",
+            "sudo_5": "Sudo Users List:\n\nBot Admin:\n", # "Owner" ko "Bot Admin" kiya
+            "sudo_6": "\n\nSudo Users:\n", # "Other Sudo Users" ko "Sudo Users" kiya
             "sudo_7": "No other sudo users found.",
             "sudo_8": "Failed to update sudo user status in database."
         }
@@ -95,10 +95,10 @@ async def userdel(client: Client, message: Message, _):
         await message.reply_text(_["sudo_8"])
 
 
-@Client.on_message(filters.command(["sudolist", "listsudo", "sudoers"]) & ~filters.user(Config.ADMIN))
+@Client.on_message(filters.command(["sudolist", "listsudo", "sudoers"]) & ~filters.user(Config.BANNED_USERS))
 @language
 async def sudoers_list(client: Client, message: Message, _):
-    text = _["sudo_5"]
+    text = _["sudo_5"] # Ab "Bot Admin" se shuru hoga
     
     owner_user_raw = await client.get_users(Config.ADMIN)
     
@@ -109,12 +109,12 @@ async def sudoers_list(client: Client, message: Message, _):
     else:
         owner_user = owner_user_raw
 
-    owner_mention = "Owner"
+    owner_mention = "Bot Admin" # Default fallback
 
     if owner_user:
         owner_mention = owner_user.first_name if not owner_user.mention else owner_user.mention
     else:
-        owner_mention = f"Owner (ID: {Config.ADMIN}) - Not Found"
+        owner_mention = f"Bot Admin (ID: {Config.ADMIN}) - Not Found"
 
     text += f"❖ {owner_mention}\n"
     
@@ -129,7 +129,7 @@ async def sudoers_list(client: Client, message: Message, _):
                 
                 if smex == 0:
                     smex += 1
-                    text += _["sudo_6"]
+                    text += _["sudo_6"] # Ab "Sudo Users" se shuru hoga
                 
                 count += 1
                 text += f"❖ {count} ➥ {user_mention}\n"
