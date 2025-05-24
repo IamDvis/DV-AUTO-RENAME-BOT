@@ -7,7 +7,7 @@ from aiohttp import web
 from route import web_server
 import pyrogram.utils
 import logging
-from database import DvisPappa
+from helper.database import DvisPappa
 from helper.misc import sudo
 
 logging.basicConfig(
