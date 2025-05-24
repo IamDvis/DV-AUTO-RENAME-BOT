@@ -9,15 +9,15 @@ from config import Config
 def language(func):
     async def wrapper(client, message, *args, **kwargs):
         _ = {
-            "general_1": "Please reply to a user's message or provide a user ID/username.",
-            "sudo_1": "{} already a sudo user.",
-            "sudo_2": "{} added to sudo users.",
-            "sudo_3": "{} is not a sudo user.",
-            "sudo_4": "{} removed from sudo users.",
-            "sudo_5": "Sudo Users List:\n\nowener:\n",
-            "sudo_6": "\n\nsudos:\n",
-            "sudo_7": "No other sudo users found.",
-            "sudo_8": "Failed to update sudo user status in database."
+            "general_1": "ᴘʟєᴧꜱє ʀєᴘʟʏ ᴛσ ᴧ ᴜꜱєʀ'ꜱ ϻєꜱꜱᴧɢє σʀ ᴘʀσᴠɪᴅє ᴧ ᴜꜱєʀ ɪᴅ/ᴜꜱєʀηᴧϻє.",
+            "sudo_1": "{} ᴧʟʀєᴧᴅʏ ᴧ ꜱᴜᴅσ ᴜꜱєʀ.",
+            "sudo_2": "{} ᴧᴅᴅєᴅ ᴛσ ꜱᴜᴅσ ᴜꜱєʀꜱ.",
+            "sudo_3": "{} ɪꜱ ησᴛ ᴧ ꜱᴜᴅσ ᴜꜱєʀ.",
+            "sudo_4": "{} ʀєϻσᴠєᴅ ꜰʀσϻ ꜱᴜᴅσ ᴜꜱєʀꜱ.",
+            "sudo_5": "ꜱᴜᴅσ ᴜꜱєʀꜱ ʟɪꜱᴛ:\n\nσᴡηєʀ:\n",
+            "sudo_6": "\n\nꜱᴜᴅσꜱ:\n",
+            "sudo_7": "ησ σᴛʜєʀ ꜱᴜᴅσ ᴜꜱєʀꜱ ꜰσᴜηᴅ.",
+            "sudo_8": "ꜰᴧɪʟєᴅ ᴛσ ᴜᴘᴅᴧᴛє ꜱᴜᴅσ ᴜꜱєʀ ꜱᴛᴧᴛᴜꜱ ɪη ᴅᴧᴛᴧʙᴧꜱє."
         }
         return await func(client, message, _, *args, **kwargs)
     return wrapper
@@ -127,8 +127,6 @@ async def sudoers_list(client: Client, message: Message, _):
         text += _["sudo_6"]
         for i, mention in enumerate(other_sudo_users):
             text += f"❖ {i+1} ➥ {mention}\n"
-    else:
-        text += _["sudo_7"]
     
     await message.reply_text(text, reply_markup=close_markup(_))
 
