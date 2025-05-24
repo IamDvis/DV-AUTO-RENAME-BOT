@@ -31,11 +31,9 @@ class Bot(Client):
             plugins={"root": "plugins"},
             sleep_threshold=15,
         )
-        LOGGER.info("Bot instance initialized.")
 
     async def start(self):
         try:
-            LOGGER.info("Starting Pyrogram client...")
             await super().start()
             me = await self.get_me()
             self.mention = me.mention
@@ -48,7 +46,6 @@ class Bot(Client):
                 if DvisPappa._client is None:
                     LOGGER.error("Database client initialization failed. Check DB_URL and DB_NAME in config.")
                 else:
-                    LOGGER.info("Database connected. Loading sudoers...")
                     await sudo()
             except Exception as e:
                 LOGGER.error(f"Error during database or sudoers operations: {e}")
@@ -95,4 +92,3 @@ class Bot(Client):
 
 if __name__ == "__main__":
     Bot().run()
-
