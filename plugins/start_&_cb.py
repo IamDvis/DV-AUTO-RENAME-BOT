@@ -2,7 +2,7 @@ import random
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 
-from ʜєʟᴘer.database import DvisPappa
+from helper.database import DvisPappa
 from config import Config, Txt
 
 @Client.on_message(filters.private & filters.command("start"))
