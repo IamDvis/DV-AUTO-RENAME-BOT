@@ -16,8 +16,8 @@ async def start(client, message):
             InlineKeyboardButton('💬 ꜱᴜᴘᴘσʀᴛ', url='https://t.me/+cXIPgHSuJnxiNjU1')
         ],
         [
-            InlineKeyboardButton('⚙️ ʜєʟᴘ', callback_data='ʜєʟᴘ'),
-            InlineKeyboardButton('💙 ᴧʙσᴜᴛ', callback_data='ᴧʙσᴜᴛ')
+            InlineKeyboardButton('⚙️ ʜєʟᴘ', callback_data='help'),
+            InlineKeyboardButton('💙 ᴧʙσᴜᴛ', callback_data='about')
         ],
         [
             InlineKeyboardButton("🧑‍💻 ᴅєᴠєʟσᴘєʀ 🧑‍💻", url='https://t.me/DvisDmBot')
@@ -42,7 +42,7 @@ async def cb_handler(client, query: CallbackQuery):
     data = query.data 
     user_id = query.from_user.id  
     
-    if data == "ʜσϻє":
+    if data == "home":
         await query.message.edit_text(
             text=Txt.START_TXT.format(query.from_user.mention),
             disable_web_page_preview=True,
@@ -52,8 +52,8 @@ async def cb_handler(client, query: CallbackQuery):
                     InlineKeyboardButton('💬 ꜱᴜᴘᴘσʀᴛ', url='https://t.me/+cXIPgHSuJnxiNjU1')
                 ],
                 [
-                    InlineKeyboardButton('⚙️ ʜєʟᴘ', callback_data='ʜєʟᴘ'),
-                    InlineKeyboardButton('💙 ᴧʙσᴜᴛ', callback_data='ᴧʙσᴜᴛ')
+                    InlineKeyboardButton('⚙️ ʜєʟᴘ', callback_data='help'),
+                    InlineKeyboardButton('💙 ᴧʙσᴜᴛ', callback_data='about')
                 ],
                 [
                     InlineKeyboardButton("🧑‍💻 ᴅєᴠєʟσᴘєʀ 🧑‍💻", url='https://t.me/DvisDmBot')
@@ -61,19 +61,19 @@ async def cb_handler(client, query: CallbackQuery):
             ])
         )
     
-    elif data == "ᴄᴧᴘᴛɪση":
+    elif data == "caption":
         await query.message.edit_text(
             text=Txt.ᴄᴧᴘᴛɪση_TXT,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callback_data="ᴄʟσꜱє"),
-                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callback_data="ʜєʟᴘ")
+                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callback_data="close"),
+                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callback_data="help")
                 ]
             ])
         )
     
-    elif data == "ʜєʟᴘ":
+    elif data == "help":
         await query.message.edit_text(
             text=Txt.ʜєʟᴘ_TXT.format(client.mention),
             disable_web_page_preview=True,
@@ -82,24 +82,24 @@ async def cb_handler(client, query: CallbackQuery):
                     InlineKeyboardButton("⚙️ ꜱєᴛᴜᴘ ᴧᴜᴛσʀєηᴧϻє ꜰσʀϻᴧᴛ ⚙️", callback_data='file_names')
                 ],
                 [
-                    InlineKeyboardButton('🖼️ ᴛʜᴜϻʙηᴧɪʟ', callback_data='ᴛʜᴜϻʙηᴧɪʟ'),
-                    InlineKeyboardButton('✏️ ᴄᴧᴘᴛɪση', callback_data='ᴄᴧᴘᴛɪση')
+                    InlineKeyboardButton('🖼️ ᴛʜᴜϻʙηᴧɪʟ', callback_data='thumbnail'),
+                    InlineKeyboardButton('✏️ ᴄᴧᴘᴛɪση', callback_data='caption')
                 ],
                 [
-                    InlineKeyboardButton('🏠 ʜσϻє', callback_data='ʜσϻє'),
-                    InlineKeyboardButton('💰 ᴅσηᴧᴛє', callback_data='ᴅσηᴧᴛє')
+                    InlineKeyboardButton('🏠 ʜσϻє', callback_data='home'),
+                    InlineKeyboardButton('💰 ᴅσηᴧᴛє', callback_data='donate')
                 ]
             ])
         )
     
-    elif data == "ᴅσηᴧᴛє":
+    elif data == "donate":
         await query.message.edit_text(
             text=Txt.ᴅσηᴧᴛє_TXT,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callback_data="ᴄʟσꜱє"),
-                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callback_data="ʜєʟᴘ")
+                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callback_data="close"),
+                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callback_data="help")
                 ]
             ])
         )
@@ -111,36 +111,36 @@ async def cb_handler(client, query: CallbackQuery):
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callback_data="ᴄʟσꜱє"),
-                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callback_data="ʜєʟᴘ")
+                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callback_data="close"),
+                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callback_data="help")
                 ]
             ])
         )
     
-    elif data == "ᴛʜᴜϻʙηᴧɪʟ":
+    elif data == "thumbnail":
         await query.message.edit_ᴄᴧᴘᴛɪση(
             ᴄᴧᴘᴛɪση=Txt.ᴛʜᴜϻʙηᴧɪʟ_TXT,
             reply_markup=InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callback_data="ᴄʟσꜱє"),
-                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callback_data="ʜєʟᴘ")
+                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callback_data="close"),
+                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callback_data="help")
                 ]
             ])
         )
     
-    elif data == "ᴧʙσᴜᴛ":
+    elif data == "about":
         await query.message.edit_text(
             text=Txt.ᴧʙσᴜᴛ_TXT,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callback_data="ᴄʟσꜱє"),
-                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callback_data="ʜσϻє")
+                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callback_data="close"),
+                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callback_data="home")
                 ]
             ])
         )
     
-    elif data == "ᴄʟσꜱє":
+    elif data == "close":
         try:
             await query.message.delete()
             await query.message.reply_to_message.delete()
