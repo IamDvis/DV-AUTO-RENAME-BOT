@@ -27,7 +27,7 @@ async def start(client, message):
     if Config.START_PIC:
         await message.reply_photo(
             Config.START_PIC, 
-            ᴄᴧᴘᴛɪση=Txt.START_TXT.format(user.mention), 
+            caption=Txt.START_TXT.format(user.mention), 
             reply_markup=button
         )
     else:
@@ -63,7 +63,7 @@ async def cb_handler(client, query: CallbackQuery):
     
     elif data == "caption":
         await query.message.edit_text(
-            text=Txt.ᴄᴧᴘᴛɪση_TXT,
+            text=Txt.CAPTION_TXT,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [
@@ -75,7 +75,7 @@ async def cb_handler(client, query: CallbackQuery):
     
     elif data == "help":
         await query.message.edit_text(
-            text=Txt.ʜєʟᴘ_TXT.format(client.mention),
+            text=Txt.HELP_TXT.format(client.mention),
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [
@@ -94,7 +94,7 @@ async def cb_handler(client, query: CallbackQuery):
     
     elif data == "donate":
         await query.message.edit_text(
-            text=Txt.ᴅσηᴧᴛє_TXT,
+            text=Txt.DONATE_TXT,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [
@@ -118,8 +118,8 @@ async def cb_handler(client, query: CallbackQuery):
         )
     
     elif data == "thumbnail":
-        await query.message.edit_ᴄᴧᴘᴛɪση(
-            ᴄᴧᴘᴛɪση=Txt.ᴛʜᴜϻʙηᴧɪʟ_TXT,
+        await query.message.edit_caption(
+            caption=Txt.THUMBNAIL_TXT,
             reply_markup=InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton("✖️ ᴄʟσꜱє", callback_data="close"),
@@ -130,7 +130,7 @@ async def cb_handler(client, query: CallbackQuery):
     
     elif data == "about":
         await query.message.edit_text(
-            text=Txt.ᴧʙσᴜᴛ_TXT,
+            text=Txt.ABOUT_TXT,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [
