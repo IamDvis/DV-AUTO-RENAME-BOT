@@ -22,6 +22,12 @@ class Config(object):
     
     WEBHOOK = bool(os.environ.get("WEBHOOK", "True"))
 
+    # Updated list with React emojis
+    D = ["😘", "👾", "🤝", "👀", "❤️‍🔥", "💘", "😍", "😇", "🕊️", "🐳", 
+         "🎉", "🏆", "🗿", "⚡", "💯", "👌", "🍾"
+        ]
+
+
 
 
 class Txt(object):
