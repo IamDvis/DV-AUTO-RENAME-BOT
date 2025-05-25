@@ -27,68 +27,69 @@ class Config(object):
 class Txt(object):
     # part of text configuration
         
-    START_TXT = """Hello {} 
+    START_TXT = """<b>ʜєʟʟσ</b> {}.
     
-➻ This Is An Advanced And Yet Powerful Rename Bot.
-    
-➻ Using This Bot You Can Auto Rename Of Your Files.
-    
-➻ This Bot Also Supports Custom Thumbnail And Custom Caption.
-    
-➻ Use /tutorial Command To Know How To Use Me.
-    
-<b>Bot Is Made By @net_pro_max</b>"""
-    
-    FILE_NAME_TXT = """<b><u>SETUP AUTO RENAME FORMAT</u></b>
+🚀 <b>ᴧᴅᴠᴧηᴄєᴅ & ᴘσᴡєʀꜰᴜʟ ʀєηᴧϻє ʙσᴛ</b>
 
-Use These Keywords To Setup Custom File Name
+✨ <b>ᴧᴜᴛσϻᴧᴛɪᴄᴧʟʟʏ ʀєηᴧϻє ʏσᴜʀ ꜰɪʟєꜱ</b> ᴡɪᴛʜ єᴧꜱє!
+✨ <b>ꜱᴜᴘᴘσʀᴛꜱ ᴄᴜꜱᴛσϻ ᴛʜᴜϻʙηᴧɪʟꜱ</b> ꜰσʀ ᴘєʀꜱσηᴧʟɪᴢєᴅ ᴘʀєᴠɪєᴡꜱ.
+✨ <b>ᴧᴅᴅ ᴄᴜꜱᴛσϻ ᴄᴧᴘᴛɪσηꜱ</b> ᴛσ ʏσᴜʀ ꜰɪʟєꜱ єꜰꜰσʀᴛʟєꜱꜱʟʏ.
 
-✓ episode :- To Replace Episode Number
-✓ quality :- To Replace Video Resolution
+📌 <b>ηєєᴅ ʜєʟᴘ? ᴜꜱє ᴛʜє <b>/tutorial ᴄσϻϻᴧηᴅ ᴛσ ʟєᴧʀη ʜσᴡ ᴛσ ɢєᴛ ꜱᴛᴧʀᴛєᴅ!
+    
+<b>❖ ϻᴧᴅє ʙʏ  ➛ @net_pro_max</b>"""
+    
+    FILE_NAME_TXT = """<b><u>ꜱєᴛᴜᴘ ᴧᴜᴛσ ʀєηᴧϻє ꜰσʀϻᴧᴛ</u></b>
 
-<b>➻ Example :</b> <code> /autorename One Piece S01 - EPepisode - quality  [Dual Audio] - @net_pro_max </code>
+ᴜꜱє ᴛʜєꜱє ᴋєʏᴡσʀᴅꜱ ᴛσ ꜱєᴛᴜᴘ ᴄᴜꜱᴛσϻ ꜰɪʟє ηᴧϻє
 
-<b>➻ Your Current Auto Rename Format :</b> <code>{format_template}</code> """
-    
-    ABOUT_TXT = f"""<b>🤖 My Name :</b> <a href='https://t.me/EraVibesXbot'>Auto Rename Bot ⚡</a>
-<b>📝 Language :</b> <a href='https://python.org'>Python 3</a>
-<b>📚 Library :</b> <a href='https://pyrogram.org'>Pyrogram 2.0</a>
-<b>🚀 Server :</b> <a href='https://heroku.com'>Heroku</a>
-<b>📢 Channel :</b> <a href='https://t.me/net_pro_max'>Network</a>
-<b>🧑‍💻 Developer :</b> <a href='https://t.me/DvisDmBot'>Dvis Pappa</a>
-    
-<b>♻️ Bot Made By :</b> @net_pro_max"""
+✓ episode :- ᴛσ ʀєᴘʟᴧᴄє єᴘɪꜱσᴅє ηᴜϻʙєʀ
+✓ quality :- ᴛσ ʀєᴘʟᴧᴄє ᴠɪᴅєσ ʀєꜱσʟᴜᴛɪση
+✓ season :- ᴛσ ʀєᴘʟᴧᴄє ꜱєᴧꜱση ηᴜϻʙєʀ
 
-    
-    THUMBNAIL_TXT = """<b><u>🖼️  HOW TO SET THUMBNAIL</u></b>
-    
-⦿ You Can Add Custom Thumbnail Simply By Sending A Photo To Me....
-    
-⦿ /viewthumb - Use This Command To See Your Thumbnail
-⦿ /delthumb - Use This Command To Delete Your Thumbnail"""
+<b>➻ єxᴧϻᴘʟє :</b> <code> /autorename [@TGUrlsHub]  One Piece [Sseason EPepisode] [quality] </code>
 
-    CAPTION_TXT = """<b><u>📝  HOW TO SET CAPTION</u></b>
+<b>➻ ʏσᴜʀ ᴄᴜʀʀєηᴛ ᴧᴜᴛσ ʀєηᴧϻє ꜰσʀϻᴧᴛ :</b> <code>{format_template}</code> """
     
-⦿ /set_caption - Use This Command To Set Your Caption
-⦿ /see_caption - Use This Command To See Your Caption
-⦿ /del_caption - Use This Command To Delete Your Caption"""
+    ABOUT_TXT = f"""<b>🤖 ϻʏ ηᴧϻє :</b> <a href='https://t.me/EraVibesXbot'> Rename Bot ⚡</a>
+<b>📝 ʟᴧηɢᴜᴧɢє :</b> <a href='https://python.org'>Python 3</a>
+<b>📚 ʟɪʙʀᴧʀʏ :</b> <a href='https://pyrogram.org'>Pyrogram 2.0</a>
+<b>🚀 ꜱєʀᴠєʀ :</b> <a href='https://heroku.com'>Heroku</a>
+<b>📢 ᴄʜᴧηηєʟ :</b> <a href='https://t.me/net_pro_max'>Network</a>
+<b>🧑‍💻 ᴅєᴠєʟσᴘєʀ :</b> <a href='https://t.me/DvisDmBot'>Dvis Pappa</a>
+    
+<b>❖ ϻᴧᴅє ʙʏ  ➛</b> @net_pro_max"""
+
+      
+    THUMBNAIL_TXT = """<b><u>🖼️ ʜσᴡ ᴛσ ꜱєᴛ ᴛʜᴜϻʙηᴧɪʟ</u></b>
+    
+⦿ ʏσᴜ ᴄᴧη ᴧᴅᴅ ᴄᴜꜱᴛσϻ ᴛʜᴜϻʙηᴧɪʟ ꜱɪϻᴘʟʏ ʙʏ ꜱєηᴅɪηɢ ᴧ ᴘʜσᴛσ ᴛσ ϻє....
+    
+⦿ /viewthumb - ᴜꜱє ᴛʜɪꜱ ᴄσϻϻᴧηᴅ ᴛσ ꜱєє ʏσᴜʀ ᴛʜᴜϻʙηᴧɪʟ
+⦿ /delthumb - ᴜꜱє ᴛʜɪꜱ ᴄσϻϻᴧηᴅ ᴛσ ᴅєʟєᴛє ʏσᴜʀ ᴛʜᴜϻʙηᴧɪʟ"""
+
+    CAPTION_TXT = """<b><u>📝  ʜσᴡ ᴛσ ꜱєᴛ ᴄᴧᴘᴛɪση</u></b>
+    
+⦿ /set_caption - ᴜꜱє ᴛʜɪꜱ ᴄσϻϻᴧηᴅ ᴛσ ꜱєᴛ ʏσᴜʀ ᴄᴧᴘᴛɪση
+⦿ /see_caption - ᴜꜱє ᴛʜɪꜱ ᴄσϻϻᴧηᴅ ᴛσ ꜱєє ʏσᴜʀ ᴄᴧᴘᴛɪση
+⦿ /del_caption - ᴜꜱє ᴛʜɪꜱ ᴄσϻϻᴧηᴅ ᴛσ ᴅєʟєᴛє ʏσᴜʀ ᴄᴧᴘᴛɪση"""
 
     PROGRESS_BAR = """\n
-<b>📁 Size</b> : {1} | {2}
-<b>⏳️ Done</b> : {0}%
-<b>🚀 Speed</b> : {3}/s
-<b>⏰️ ETA</b> : {4} """
+<b>📁 ꜱɪᴢє</b> : {1} | {2}
+<b>⏳️ ᴅσηє</b> : {0}%
+<b>🚀 ꜱᴘєєᴅ</b> : {3}/s
+<b>⏰️ єᴛᴧ</b> : {4} """
     
     
-    DONATE_TXT = """<b>🥲 Thanks For Showing Interest In Donation! ❤️</b>
+    DONATE_TXT = """<b>🥲 ᴛʜᴧηᴋꜱ ꜰσʀ ꜱʜσᴡɪηɢ ɪηᴛєʀєꜱᴛ ɪη ᴅσηᴧᴛɪση! ❤️</b>
     
-If You Like My Bots & Projects, You Can 🎁 Donate Me Any Amount From 10 Rs Upto Your Choice.
+ɪꜰ ʏσᴜ ʟɪᴋє ϻʏ ʙσᴛꜱ & ᴘʀσᴊєᴄᴛꜱ, ʏσᴜ ᴄᴧη 🎁 ᴅσηᴧᴛє ϻє ᴧηʏ ᴧϻσᴜηᴛ ꜰʀσϻ 10 ʀꜱ ᴜᴘᴛσ ʏσᴜʀ ᴄʜσɪᴄє.
     
-<b>🛍 UPI ID:</b> <code>upi id</code> """
+<b>🛍 ᴜᴘɪ ɪᴅ:</b> <code>upi id</code> """
     
-    HELP_TXT = """<b>Hey</b> {}
+    HELP_TXT = """<b>ʜєʏ</b> {}
     
-Here Is The Help For My Commands."""
+ʜєʀє ɪꜱ ᴛʜє ʜєʟᴘ ꜰσʀ ϻʏ ᴄσϻϻᴧηᴅꜱ."""
 
 
 
