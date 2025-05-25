@@ -1,6 +1,6 @@
 import random
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallʙᴧᴄᴋQuery
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 
 from ʜєʟᴘer.database import DvisPappa
 from config import Config, Txt
@@ -38,7 +38,7 @@ async def start(client, message):
         )
 
 @Client.on_callʙᴧᴄᴋ_query()
-async def cb_handler(client, query: CallʙᴧᴄᴋQuery):
+async def cb_handler(client, query: CallbackQuery):
     data = query.data 
     user_id = query.from_user.id  
     
