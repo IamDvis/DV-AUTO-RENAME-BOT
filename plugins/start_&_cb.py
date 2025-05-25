@@ -16,8 +16,8 @@ async def start(client, message):
             InlineKeyboardButton('💬 ꜱᴜᴘᴘσʀᴛ', url='https://t.me/+cXIPgHSuJnxiNjU1')
         ],
         [
-            InlineKeyboardButton('⚙️ ʜєʟᴘ', callʙᴧᴄᴋ_data='ʜєʟᴘ'),
-            InlineKeyboardButton('💙 ᴧʙσᴜᴛ', callʙᴧᴄᴋ_data='ᴧʙσᴜᴛ')
+            InlineKeyboardButton('⚙️ ʜєʟᴘ', callback_data='ʜєʟᴘ'),
+            InlineKeyboardButton('💙 ᴧʙσᴜᴛ', callback_data='ᴧʙσᴜᴛ')
         ],
         [
             InlineKeyboardButton("🧑‍💻 ᴅєᴠєʟσᴘєʀ 🧑‍💻", url='https://t.me/DvisDmBot')
@@ -37,7 +37,7 @@ async def start(client, message):
             disable_web_page_preview=True
         )
 
-@Client.on_callʙᴧᴄᴋ_query()
+@Client.on_callback_query()
 async def cb_handler(client, query: CallbackQuery):
     data = query.data 
     user_id = query.from_user.id  
@@ -52,8 +52,8 @@ async def cb_handler(client, query: CallbackQuery):
                     InlineKeyboardButton('💬 ꜱᴜᴘᴘσʀᴛ', url='https://t.me/+cXIPgHSuJnxiNjU1')
                 ],
                 [
-                    InlineKeyboardButton('⚙️ ʜєʟᴘ', callʙᴧᴄᴋ_data='ʜєʟᴘ'),
-                    InlineKeyboardButton('💙 ᴧʙσᴜᴛ', callʙᴧᴄᴋ_data='ᴧʙσᴜᴛ')
+                    InlineKeyboardButton('⚙️ ʜєʟᴘ', callback_data='ʜєʟᴘ'),
+                    InlineKeyboardButton('💙 ᴧʙσᴜᴛ', callback_data='ᴧʙσᴜᴛ')
                 ],
                 [
                     InlineKeyboardButton("🧑‍💻 ᴅєᴠєʟσᴘєʀ 🧑‍💻", url='https://t.me/DvisDmBot')
@@ -67,8 +67,8 @@ async def cb_handler(client, query: CallbackQuery):
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callʙᴧᴄᴋ_data="ᴄʟσꜱє"),
-                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callʙᴧᴄᴋ_data="ʜєʟᴘ")
+                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callback_data="ᴄʟσꜱє"),
+                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callback_data="ʜєʟᴘ")
                 ]
             ])
         )
@@ -79,15 +79,15 @@ async def cb_handler(client, query: CallbackQuery):
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton("⚙️ ꜱєᴛᴜᴘ ᴧᴜᴛσʀєηᴧϻє ꜰσʀϻᴧᴛ ⚙️", callʙᴧᴄᴋ_data='file_names')
+                    InlineKeyboardButton("⚙️ ꜱєᴛᴜᴘ ᴧᴜᴛσʀєηᴧϻє ꜰσʀϻᴧᴛ ⚙️", callback_data='file_names')
                 ],
                 [
-                    InlineKeyboardButton('🖼️ ᴛʜᴜϻʙηᴧɪʟ', callʙᴧᴄᴋ_data='ᴛʜᴜϻʙηᴧɪʟ'),
-                    InlineKeyboardButton('✏️ ᴄᴧᴘᴛɪση', callʙᴧᴄᴋ_data='ᴄᴧᴘᴛɪση')
+                    InlineKeyboardButton('🖼️ ᴛʜᴜϻʙηᴧɪʟ', callback_data='ᴛʜᴜϻʙηᴧɪʟ'),
+                    InlineKeyboardButton('✏️ ᴄᴧᴘᴛɪση', callback_data='ᴄᴧᴘᴛɪση')
                 ],
                 [
-                    InlineKeyboardButton('🏠 ʜσϻє', callʙᴧᴄᴋ_data='ʜσϻє'),
-                    InlineKeyboardButton('💰 ᴅσηᴧᴛє', callʙᴧᴄᴋ_data='ᴅσηᴧᴛє')
+                    InlineKeyboardButton('🏠 ʜσϻє', callback_data='ʜσϻє'),
+                    InlineKeyboardButton('💰 ᴅσηᴧᴛє', callback_data='ᴅσηᴧᴛє')
                 ]
             ])
         )
@@ -98,8 +98,8 @@ async def cb_handler(client, query: CallbackQuery):
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callʙᴧᴄᴋ_data="ᴄʟσꜱє"),
-                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callʙᴧᴄᴋ_data="ʜєʟᴘ")
+                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callback_data="ᴄʟσꜱє"),
+                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callback_data="ʜєʟᴘ")
                 ]
             ])
         )
@@ -111,8 +111,8 @@ async def cb_handler(client, query: CallbackQuery):
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callʙᴧᴄᴋ_data="ᴄʟσꜱє"),
-                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callʙᴧᴄᴋ_data="ʜєʟᴘ")
+                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callback_data="ᴄʟσꜱє"),
+                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callback_data="ʜєʟᴘ")
                 ]
             ])
         )
@@ -122,8 +122,8 @@ async def cb_handler(client, query: CallbackQuery):
             ᴄᴧᴘᴛɪση=Txt.ᴛʜᴜϻʙηᴧɪʟ_TXT,
             reply_markup=InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callʙᴧᴄᴋ_data="ᴄʟσꜱє"),
-                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callʙᴧᴄᴋ_data="ʜєʟᴘ")
+                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callback_data="ᴄʟσꜱє"),
+                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callback_data="ʜєʟᴘ")
                 ]
             ])
         )
@@ -134,8 +134,8 @@ async def cb_handler(client, query: CallbackQuery):
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callʙᴧᴄᴋ_data="ᴄʟσꜱє"),
-                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callʙᴧᴄᴋ_data="ʜσϻє")
+                    InlineKeyboardButton("✖️ ᴄʟσꜱє", callback_data="ᴄʟσꜱє"),
+                    InlineKeyboardButton("🔙 ʙᴧᴄᴋ", callback_data="ʜσϻє")
                 ]
             ])
         )
